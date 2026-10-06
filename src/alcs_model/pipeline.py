@@ -45,11 +45,16 @@ def load_prepared(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
     return p, pa
 
 
-def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame) -> Fitted:
+def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None = None) -> Fitted:
+    """Fit outcome rates and pitch profiles. `tuned` (from the backtest) overrides shrinkage and recency."""
     m = cfg.model
     as_of = pitches["game_date"].max()
     hl = m.get("recent_half_life_days", 0)
-    rates = build_rates(pa, m["shrink"]["pa"], hl, as_of)
+    k_pa = dict(m["shrink"]["pa"])
+    if tuned:
+        hl = tuned.get("half_life", hl)
+        k_pa = {o: v * tuned.get("shrink_mult", 1.0) for o, v in k_pa.items()}
+    rates = build_rates(pa, k_pa, hl, as_of)
     prof = build_profiles(pitches, m["shrink"], hl, as_of)
     li = leverage_table(pa)
     return Fitted(pitches, pa, rates, prof, li, as_of)
@@ -159,8 +164,6 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
     t0 = time.time()
     p, pa = load_prepared(cfg)
     _log(f"loaded {len(p):,} pitches, {len(pa):,} plate appearances", t0)
-    F = fit(cfg, p, pa)
-    _log("fit rates and pitch profiles", t0)
     m = cfg.model
     bt_path = OUTPUT / "backtest.json"
     bt = None
@@ -172,6 +175,9 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             print(f"backtest skipped: {e}")
     elif bt_path.exists():
         bt = json.loads(bt_path.read_text())
+    tuned = bt.get("tuned") if bt else None
+    F = fit(cfg, p, pa, tuned)
+    _log("fit rates and pitch profiles" + (f" (shrink x{tuned['shrink_mult']}, half-life {tuned['half_life']})" if tuned else ""), t0)
     lam = float(bt["lambda"]) if bt and bt.get("mix_gain_pct", 0) > 0 else 0.0
     _log(f"pitch-mix lambda = {lam}", t0)
 
@@ -224,7 +230,7 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
                                                                               a=("post_away_score", "max"))
     league_rpg = float((reg_games["h"].mean() + reg_games["a"].mean()) / 2)
     park_runs = agg.park_run_index(cfg, lb["park_factors"], [pl.venue for pl in plans])
-    scoring = calibrate_scoring(ctx, plans, league_rpg * park_runs, seed=seed)
+    scoring = calibrate_scoring(ctx, plans, league_rpg * park_runs, n_games=2000, seed=seed)
     _log(f"scoring calibration: tilt {scoring['tilt']:+.3f}, league-average teams "
          f"{scoring['rpg_at_0']:.2f} -> {scoring['rpg_after']:.2f} R/G (target {scoring['target_rpg']:.2f})", t0)
     sim = sim_series(ctx, plans, n_series, seed)
@@ -240,8 +246,8 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             # game-level bootstrap via weights: a game drawn twice counts twice in every rate
             pb = p[p["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
             pab = pa[pa["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
-            Fb = Fitted(pb, pab, build_rates(pab, m["shrink"]["pa"], m.get("recent_half_life_days", 0), F.as_of),
-                        build_profiles(pb, m["shrink"], m.get("recent_half_life_days", 0), F.as_of), F.li, F.as_of)
+            Fb = fit(cfg, pb, pab, tuned)
+            Fb.li = F.li
             cb, plb = build_sim_context(cfg, Fb, ros, bats, throws, lam, pf_mult, boost)
             cb.scoring_tilt = ctx.scoring_tilt
             r = sim_series(cb, plb, per, seed + 100 + b)

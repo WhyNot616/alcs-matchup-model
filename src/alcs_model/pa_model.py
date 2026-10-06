@@ -157,7 +157,18 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     val_start = split - pd.Timedelta(days=30)
     fit_pa, val_pa = train[train["game_date"] < val_start], train[train["game_date"] >= val_start]
     fit_pitch = pitches[pitches["game_date"] < val_start]
-    r_fit = build_rates(fit_pa, shrink["pa"], hl, val_start)
+    # tune regression strength and recency on the validation window
+    tune = {}
+    for mult in (0.5, 1.0, 2.0, 3.0, 4.0):
+        for h in (0, 60, 120):
+            k_pa = {o: v * mult for o, v in shrink["pa"].items()}
+            P = _predict(build_rates(fit_pa, k_pa, h, val_start), val_pa, None, 0.0)
+            tune[(mult, h)] = _logloss(P, val_pa["outcome"].map({o: i for i, o in enumerate(OUTCOMES)}).to_numpy())
+    best_mult, hl = min(tune, key=tune.get)
+    shrink_pa = {o: v * best_mult for o, v in shrink["pa"].items()}
+    if verbose:
+        print(f"  tuned rates: shrink x{best_mult}, recency half-life {hl} days")
+    r_fit = build_rates(fit_pa, shrink_pa, hl, val_start)
     prof_fit = build_profiles(fit_pitch, shrink, hl, val_start)
     e_val = pair_edges(prof_fit, val_pa["batter"].to_numpy(), val_pa["pitcher"].to_numpy(),
                        val_pa["stand"].to_numpy())
@@ -175,7 +186,7 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     lam_best = min(val_scores, key=val_scores.get)
 
     # refit on all training data and score the test window
-    r = build_rates(train, shrink["pa"], hl, split)
+    r = build_rates(train, shrink_pa, hl, split)
     prof = build_profiles(pitches[pitches["game_date"] < split], shrink, hl, split)
     edges = pair_edges(prof, test["batter"].to_numpy(), test["pitcher"].to_numpy(), test["stand"].to_numpy())
     P_or = _predict(r, test, None, 0.0)
@@ -203,6 +214,8 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         "train_pa": int(len(train)), "test_pa": int(len(test)), "split": str(split.date()),
         "logloss": {"league": _logloss(P_lg, y), "oddsratio": _logloss(P_or, y), "oddsratio_mix": _logloss(P_mix, y)},
         "lambda": lam_best, "lambda_validation": {str(k): v for k, v in val_scores.items()},
+        "tuned": {"shrink_mult": best_mult, "half_life": hl,
+                  "grid": [{"shrink_mult": m_, "half_life": h_, "logloss": v} for (m_, h_), v in tune.items()]},
         "edge_resid_corr": corr,
         "edge_quintiles": by_q.reset_index().round(4).to_dict(orient="records"),
         "calibration": cal.reset_index().round(4).to_dict(orient="records"),
