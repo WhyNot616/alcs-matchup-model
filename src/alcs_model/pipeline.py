@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import dataclass
 from datetime import date
@@ -31,7 +32,10 @@ class Fitted:
 
 
 def _log(msg: str, t0: float) -> None:
-    print(f"[{time.time() - t0:6.1f}s] {msg}")
+    line = f"[{time.time() - t0:6.1f}s] {msg}"
+    print(line, flush=True)
+    if os.environ.get("GITHUB_ACTIONS"):
+        print(f"::notice title=build::{line}", flush=True)
 
 
 def load_prepared(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:

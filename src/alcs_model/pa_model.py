@@ -217,4 +217,8 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         print(f"  talent model beats league-only by {res['skill_vs_league_pct']:.2f}%")
         print(f"  pitch-mix tilt (lambda={lam_best}) changes log loss by {res['mix_gain_pct']:+.3f}%")
         print(f"  corr(edge, wOBA residual) = {corr:+.4f}")
+        import os
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::notice title=backtest::" + "; ".join(f"{k} {v:.5f}" for k, v in ll.items())
+                  + f"; lambda {lam_best}; mix gain {res['mix_gain_pct']:+.3f}%; corr {corr:+.4f}", flush=True)
     return res

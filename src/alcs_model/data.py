@@ -109,7 +109,9 @@ def pull_statcast(cfg: Config, scope: str = "league", refresh: bool = False,
         for i, (a, b) in enumerate(windows, 1):
             df = _statcast_window(season, a, b, types, None, "pitcher")
             if verbose:
-                print(f"  [{i}/{len(windows)}] {a} to {b}: {len(df):,} pitches")
+                print(f"  [{i}/{len(windows)}] {a} to {b}: {len(df):,} pitches", flush=True)
+            if os.environ.get("GITHUB_ACTIONS") and (i % 10 == 0 or i == len(windows)):
+                print(f"::notice title=pull progress::window {i}/{len(windows)} through {b}", flush=True)
             frames.append(df)
     elif scope == "teams":
         for team in cfg.teams:
