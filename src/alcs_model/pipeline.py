@@ -18,7 +18,7 @@ from .features import (OUTCOMES, active_players, leverage_table, plate_appearanc
                        prepare_pitches)
 from .matchups import build_profiles, matchup_detail, pair_edges
 from .pa_model import backtest, batter_side, build_rates, expected_woba, matchup_probs
-from .simulate import GamePlan, SimContext, TeamSetup, calibrate, sim_series
+from .simulate import GamePlan, SimContext, TeamSetup, calibrate, calibrate_scoring, sim_series
 
 
 @dataclass
@@ -219,6 +219,14 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
     n_boot = int(cfg.sim.get("bootstrap", 0)) if n_boot is None else n_boot
     seed = int(cfg.sim.get("seed", 0)) if seed is None else seed
     ctx, plans = build_sim_context(cfg, F, ros, bats, throws, lam, pf_mult, boost)
+    # run environment: league-average teams should score like the league did, adjusted for these parks
+    reg_games = p[p["game_type"].astype(str).eq("R")].groupby("game_pk").agg(h=("post_home_score", "max"),
+                                                                              a=("post_away_score", "max"))
+    league_rpg = float((reg_games["h"].mean() + reg_games["a"].mean()) / 2)
+    park_runs = agg.park_run_index(cfg, lb["park_factors"], [pl.venue for pl in plans])
+    scoring = calibrate_scoring(ctx, plans, league_rpg * park_runs, seed=seed)
+    _log(f"scoring calibration: tilt {scoring['tilt']:+.3f}, league-average teams "
+         f"{scoring['rpg_at_0']:.2f} -> {scoring['rpg_after']:.2f} R/G (target {scoring['target_rpg']:.2f})", t0)
     sim = sim_series(ctx, plans, n_series, seed)
     _log(f"simulated {n_series:,} series: " + ", ".join(f"{k} {v:.1%}" for k, v in sim["p_win"].items()), t0)
     boots = []
@@ -235,18 +243,17 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             Fb = Fitted(pb, pab, build_rates(pab, m["shrink"]["pa"], m.get("recent_half_life_days", 0), F.as_of),
                         build_profiles(pb, m["shrink"], m.get("recent_half_life_days", 0), F.as_of), F.li, F.as_of)
             cb, plb = build_sim_context(cfg, Fb, ros, bats, throws, lam, pf_mult, boost)
+            cb.scoring_tilt = ctx.scoring_tilt
             r = sim_series(cb, plb, per, seed + 100 + b)
             boots.append(r["p_win"])
             _log(f"bootstrap {b + 1}/{n_boot}: " + ", ".join(f"{k} {v:.1%}" for k, v in r["p_win"].items()), t0)
     # ---- calibration: does the simulator score at the right level?
     cal = calibrate(ctx, plans, n_games=int(cfg.sim.get("calibration_games", 1500)), seed=seed)
-    reg_games = p[p["game_type"].astype(str).eq("R")].groupby("game_pk").agg(h=("post_home_score", "max"),
-                                                                              a=("post_away_score", "max"))
-    actual = {"league_rpg": float((reg_games["h"].mean() + reg_games["a"].mean()) / 2)}
+    actual = {"league_rpg": league_rpg, "park_run_index": park_runs}
     for t in cfg.teams:
         G = agg.game_results(p[p["game_type"].astype(str).eq("R")], t)
         actual[t] = {"rpg": float(G["rf"].mean()), "rapg": float(G["ra"].mean())}
-    calib = {"sim": cal, "actual": actual}
+    calib = {"sim": cal, "actual": actual, "scoring": scoring}
     _log("calibration: sim league R/G " + ", ".join(f"{k} {v:.2f}" for k, v in cal["league"].items())
          + f" vs actual {actual['league_rpg']:.2f}; offense " + ", ".join(f"{k} {v:.2f}" for k, v in cal["offense"].items())
          + " vs actual " + ", ".join(f"{t} {actual[t]['rpg']:.2f}" for t in cfg.teams)

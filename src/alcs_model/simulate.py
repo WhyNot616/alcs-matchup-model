@@ -48,6 +48,7 @@ class SimContext:
     home_tilt: float
     teams: dict[str, TeamSetup]
     cache: dict = field(default_factory=dict)
+    scoring_tilt: float = 0.0                   # global run-environment calibration (see calibrate_scoring)
 
     def cum_probs(self, batter: int, pitcher: int, bat_team: str, venue: str, is_home: bool) -> np.ndarray:
         key = (batter, pitcher, venue, is_home)
@@ -64,8 +65,9 @@ class SimContext:
             mult = pf / np.sqrt(own) if own is not None else pf
         p = matchup_probs(self.rates, batter, side, pitcher, h, self.edges.get((batter, pitcher), 0.0),
                           self.lam, mult)
-        if is_home and self.home_tilt:
-            p = p * np.where(GOOD, np.exp(self.home_tilt), 1.0)
+        tilt = self.scoring_tilt + (self.home_tilt if is_home else 0.0)
+        if tilt:
+            p = p * np.where(GOOD, np.exp(tilt), 1.0)
             p = p / p.sum()
         c = np.cumsum(p)
         self.cache[key] = c
@@ -357,3 +359,35 @@ def calibrate(ctx: SimContext, plans: list[GamePlan], n_games: int = 1500, seed:
         out[name] = {t: float(np.mean(v)) for t, v in runs.items()}
     ctx.rates, ctx.cache = orig_rates, orig_cache
     return out
+
+
+def calibrate_scoring(ctx: SimContext, plans: list[GamePlan], target_rpg: float, n_games: int = 800,
+                      seed: int = 0) -> dict:
+    """Set ctx.scoring_tilt so league-average teams score target_rpg in the simulator.
+
+    The simulator leaves out stolen bases, wild pitches, errors and other small run sources, so it
+    scores a little low. A single tilt on the "good for the hitter" outcomes closes the gap without
+    changing who is better than whom. Two probe runs, then log-linear interpolation.
+    """
+    from .pa_model import Rates
+
+    orig_rates, orig_cache, orig_tilt = ctx.rates, ctx.cache, ctx.scoring_tilt
+    ctx.rates = Rates(orig_rates.league, {}, {}, {}, {})
+
+    def rpg(tilt: float) -> float:
+        ctx.scoring_tilt, ctx.cache = tilt, {}
+        rng = np.random.default_rng(seed)
+        tot = 0
+        for i in range(n_games):
+            ar, hr = sim_game(ctx, plans[i % len(plans)], Fatigue(), rng)
+            tot += ar + hr
+        return tot / (2 * n_games)
+
+    t0, t1 = 0.0, 0.10
+    r0, r1 = rpg(t0), rpg(t1)
+    slope = (np.log(r1) - np.log(r0)) / (t1 - t0)
+    tilt = float(t0 + (np.log(target_rpg) - np.log(r0)) / slope) if slope > 0 else 0.0
+    tilt = float(np.clip(tilt, -0.3, 0.3))
+    check = rpg(tilt)
+    ctx.rates, ctx.cache, ctx.scoring_tilt = orig_rates, {}, tilt
+    return {"target_rpg": target_rpg, "rpg_at_0": r0, "tilt": tilt, "rpg_after": check}

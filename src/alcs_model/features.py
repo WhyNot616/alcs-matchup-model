@@ -97,7 +97,10 @@ def recency_weights(dates: pd.Series, half_life_days: float, as_of: pd.Timestamp
         return np.ones(len(dates))
     as_of = as_of if as_of is not None else dates.max()
     age = (as_of - dates).dt.days.clip(lower=0).to_numpy()
-    return 0.5 ** (age / half_life_days)
+    w = 0.5 ** (age / half_life_days)
+    # Normalize to mean 1 so recency tilts each player's sample toward recent games without
+    # shrinking the effective sample size (which would double-count regression to the mean).
+    return w / w.mean() if len(w) else w
 
 
 def plate_appearances(pitches: pd.DataFrame) -> pd.DataFrame:

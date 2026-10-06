@@ -322,3 +322,15 @@ def park_multipliers(cfg, pf: pd.DataFrame | None) -> dict:
             f = lambda c: float(r[c]) / 100 if pd.notna(r[c]) else 1.0  # noqa: E731
             out[(v, side)] = np.array([f("index_so"), f("index_bb"), f("index_1b"), f("index_2b"), f("index_3b"), f("index_hr"), 1.0])
     return out
+
+
+def park_run_index(cfg, pf: pd.DataFrame | None, venues: list[str]) -> float:
+    """Average 3-year runs park factor over the series venues (1.0 = neutral)."""
+    if pf is None or pf.empty:
+        return 1.0
+    sub = pf[(pf["rolling_years"] == 3) & (pf["bat_side_key"].astype(str) == "All")]
+    vals = []
+    for v in venues:
+        r = sub[sub["venue_name"].eq(v)]
+        vals.append(float(r["index_runs"].iloc[0]) / 100 if len(r) and pd.notna(r["index_runs"].iloc[0]) else 1.0)
+    return float(np.mean(vals)) if vals else 1.0
