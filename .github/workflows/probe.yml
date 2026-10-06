@@ -1,0 +1,12 @@
+name: savant probe
+# Quick connectivity check: can this runner reach Baseball Savant and the MLB Stats API?
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set -x
+          curl -s -o /tmp/a.csv -w "%{http_code} %{size_download} %{time_total}\n" "https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=R%7C&hfSea=2026%7C&player_type=pitcher&game_date_gt=2026-09-01&game_date_lt=2026-09-02&type=details&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&sort_order=desc&min_pas=0"
+          head -c 300 /tmp/a.csv; echo; wc -l /tmp/a.csv
+          curl -s -o /dev/null -w "statsapi %{http_code}\n" "https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-09-01"
