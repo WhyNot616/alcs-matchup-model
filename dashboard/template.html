@@ -182,7 +182,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="pitchmix">
   <div class="s-head"><div class="eyebrow">01 · Pitch mix</div><h2>Run value against the pitches each staff actually throws</h2></div>
   <div class="read"><p>Each row is a pitch type. The grey bar is how often the opposing staff throws it. Next is the lineup's run value per 100 pitches against that pitch type, then the staff's run value with it, shown from the hitter's side so both bars read the same way. The edge column multiplies usage by the difference, so the total is an arsenal-weighted matchup score in runs per 100 pitches. These are raw season values, as Savant reports them.</p><p id="pm-read"></p></div>
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px">
     <div class="controls"><div class="seg" id="pm-dir" role="group" aria-label="Direction"></div>
       <div class="seg" id="pm-hand" role="group" aria-label="Pitcher hand"><button aria-pressed="true" data-v="A">All pitchers</button><button aria-pressed="false" data-v="R">RHP only</button><button aria-pressed="false" data-v="L">LHP only</button></div></div>
     <div class="headline"><div><div class="eyebrow">Matchup score, runs per 100 pitches (hitter view)</div><div class="big mono" id="pm-score"></div></div><p class="small muted" id="pm-note" style="max-width:52ch"></p></div>
@@ -194,7 +194,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="hitters">
   <div class="s-head"><div class="eyebrow">02 · Player level</div><h2>Hitter vs starter: expected wOBA from the outcome model</h2></div>
   <div class="read"><p>Each cell is the model's expected wOBA for that plate appearance: the hitter's outcome rates against the pitcher's hand and the pitcher's rates against the batter's side, combined with the odds-ratio method, then tilted by the pitch-mix edge if the backtest says the tilt helps. Click a cell for the outcome probabilities, the pitch-by-pitch breakdown and the zone overlay.</p><p id="mx-read"></p></div>
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px">
     <div class="controls"><div class="seg" id="mx-dir" role="group" aria-label="Direction"></div>
       <div class="legend">pitcher wins <span class="ramp" id="mx-ramp"></span> hitter wins <span>(.255 · .315 · .375)</span></div></div>
     <div class="scroll"><table class="mx" id="mx"></table></div>
@@ -205,7 +205,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="zones">
   <div class="s-head"><div class="eyebrow">03 · Location</div><h2>Where each lineup does damage vs where each staff throws</h2></div>
   <div class="read"><p>Statcast zones from the catcher's view: 1 to 9 is the strike zone, the four outer blocks are the chase areas. Left is the lineup's run value per 100 by zone, middle is where the opposing staff puts that pitch group, right is the staff's results by zone from the hitter's side.</p><p id="z-read"></p></div>
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px">
     <div class="controls"><div class="seg" id="z-dir" role="group" aria-label="Direction"></div>
       <div class="seg" id="z-grp" role="group" aria-label="Pitch group"><button aria-pressed="true" data-v="FB">Fastballs</button><button aria-pressed="false" data-v="BR">Breaking</button><button aria-pressed="false" data-v="OS">Offspeed</button></div></div>
     <div class="zones" id="z-out"></div>
@@ -221,7 +221,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="starters">
   <div class="s-head"><div class="eyebrow">05 · Starters</div><h2>Projected starters and how long they last</h2></div>
   <div class="read"><p>Cards follow the rotation in the config. The simulator draws each starter's length from his own 2026 batters-faced distribution, capped for planned openers, and pulls him early if he gets hit hard.</p></div>
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px">
     <div class="controls"><div class="seg" id="st-team" role="group" aria-label="Team"></div></div>
     <div class="cards" id="rot"></div>
   </div>
@@ -230,7 +230,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="bullpen">
   <div class="s-head"><div class="eyebrow">06 · Bullpens</div><h2>Bullpen tendencies, roles and situations</h2></div>
   <div class="read"><p>Roles come from how each reliever was actually used, not from saves. Leverage index (LI) measures how much a plate appearance could swing the win probability, so a 1.0 is average and 2.0 is twice as important. gmLI is a reliever's average leverage when he entered.</p><p id="bp-read"></p></div>
-  <div class="panel" style="display:grid;gap:16px">
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:16px">
     <div class="controls"><div class="seg" id="bp-team" role="group" aria-label="Team"></div></div>
     <div><h3>Usage and results</h3><div class="scroll"><table id="bp-tend"></table></div></div>
     <div><h3>Who the manager calls, by situation</h3><p class="small muted" style="margin-block:4px 8px">Share of relief appearances in each inning and score state (fielding team's view), smoothed. This table drives reliever choice in the simulator.</p><div class="scroll"><table class="heat" id="bp-grid"></table></div></div>
@@ -243,7 +243,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
   <div class="read"><p id="df-read"></p></div>
   <div class="grid2">
     <div class="panel"><h3>Team Outs Above Average</h3><p class="small muted" style="margin-bottom:10px">All 30 teams. The two series clubs are highlighted.</p><div id="oaa"></div></div>
-    <div class="panel" style="display:grid;gap:16px;align-content:start">
+    <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-content:start">
       <div><h3>Park factors</h3><p class="small muted" style="margin-bottom:8px">Statcast park factors, 3-year window (100 = average). The simulator applies these by batter side.</p><div class="scroll"><table id="park"></table></div></div>
       <div><h3>Fielders and runners to know</h3><div class="scroll"><table id="fld"></table></div></div>
     </div>
@@ -253,7 +253,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="conditions">
   <div class="s-head"><div class="eyebrow">08 · Context</div><h2>Schedule, game times, weather, home field and form</h2></div>
   <div class="read"><p id="cd-read"></p></div>
-  <div class="panel" style="display:grid;gap:14px"><div class="eyebrow">Series schedule</div><div class="sched" id="sched"></div></div>
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:14px"><div class="eyebrow">Series schedule</div><div class="sched" id="sched"></div></div>
   <div class="minis" id="cond"></div>
   <div class="grid2"><div class="panel"><h3>Team xwOBA by month, batting</h3><div id="mo-bat"></div></div><div class="panel"><h3>Team xwOBA allowed by month, pitching</h3><div id="mo-pit"></div></div></div>
 </section>
@@ -278,7 +278,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 <section class="s" id="games-bt">
   <div class="s-head"><div class="eyebrow">11 · Track record</div><h2>Backtest on real games: the 2026 playoffs and the late regular season</h2></div>
   <div class="read"><p>Each game below was predicted using only what was known before first pitch: that day's batting orders and starting pitchers, each bullpen as it stood over the previous 30 days, real bullpen fatigue from the previous two days, and a model fit on earlier games only. Playoff games use a model fit on the full regular season. The late-season test fits on games before the split date and predicts every game after it.</p><p>Brier score is the average squared error of the win probability (lower is better, a coin flip scores .250). The baselines use the same pregame information: home field alone, and log5 matchups of each team's win percentage or Pythagorean record, each with home field.</p><p id="gb-read"></p></div>
-  <div class="panel" style="display:grid;gap:12px"><h3>Every playoff game so far</h3><div class="scroll"><table id="gb-games"></table></div><p class="small muted">Model, market and Pythagorean columns are the home team's pregame win probability. The market is DraftKings' closing moneyline with the bookmaker's margin removed. A call is right when the side the model gave more than 50% won.</p></div>
+  <div class="panel" style="display:grid;grid-template-columns:minmax(0,1fr);gap:12px"><h3>Every playoff game so far</h3><div class="scroll"><table id="gb-games"></table></div><p class="small muted">Model, market and Pythagorean columns are the home team's pregame win probability. The market is DraftKings' closing moneyline with the bookmaker's margin removed. A call is right when the side the model gave more than 50% won.</p></div>
   <div class="grid2">
     <div class="panel"><h3>Scores by predictor</h3><div class="scroll"><table id="gb-metrics"></table></div><p class="small muted" style="margin-top:6px">Bold marks the best score in each column.</p></div>
     <div class="panel"><h3>Is the model really better?</h3><p class="small muted" style="margin-bottom:8px">Model Brier minus baseline Brier with a 95% bootstrap interval over games. Left of zero means the model was better. An interval crossing zero means the sample cannot tell them apart.</p><div id="gb-ci"></div></div>
@@ -402,13 +402,13 @@ function renderST(){const t=stTeam();const seen=[];const R=DATA.config.rotation[
   $('#rot').innerHTML=seen.map(s=>{const p=pitcherById(t,s.id);if(!p)return '';const ars=Object.entries(p.ars).sort((a,b)=>b[1][1]-a[1][1]);const hk=hooks[String(p.id)];
     const tto=p.tto?Object.entries(p.tto).filter(([k])=>+k<4).map(([k,v])=>`${k}x ${f3(v[1])}`).join(' · '):'mostly relief';
     return `<article class="card"><div class="g">${s.lab} · ${p.th}HP · ${p.gs} GS / ${p.g} G</div><h3>${full(p.name)}</h3><div class="stack">${ars.map(([pt,a])=>`<i style="flex:${a[1]};background:${PC[pt]||'#888'}" data-tip="${PN[pt]||pt} ${a[1]}% · ${a[4]} mph · whiff ${pc(a[5])} · ${sg(a[6])} RV/100"></i>`).join('')}</div><div class="tags">${ars.slice(0,4).map(([pt,a])=>`<span class="tag">${pt} ${a[1]}% ${a[4]??''}</span>`).join('')}</div>
-    <div class="kv"><div><span>xwOBA</span><b>${f3(p.all[2])}</b></div><div><span>K%</span><b>${pc(p.all[3])}</b></div><div><span>BB%</span><b>${pc(p.all[4])}</b></div><div><span>RV/100</span><b>${sg(p.all[7])}</b></div></div>
+    <div class="kv"><div><span>xwOBA</span><b>${f3(p.all[2])}</b></div><div><span>K%</span><b>${pc(p.all[3])}</b></div><div><span>BB%</span><b>${pc(p.all[4])}</b></div><div><span>RV/100</span><b>${sg(p.all[7])}</b></div>${p.stuff_plus!=null?`<div data-tip="Pitch quality from velocity, movement, spin, extension and release only. 100 is league average, 10 points is one standard deviation."><span>Stuff+</span><b>${Math.round(p.stuff_plus)}</b></div>`:''}</div>
     <div class="small muted">vs LHH ${f3(p.hand.L?p.hand.L[2]:null)} · vs RHH ${f3(p.hand.R?p.hand.R[2]:null)} · times through order ${tto}</div>
     ${hk?`<div class="small muted">Typical start: ${hk.bf_mean.toFixed(1)} batters (middle half ${hk.bf_p25}–${hk.bf_p75}), ${hk.pitches_mean.toFixed(0)} pitches, ${pc(hk.through_3x_pct,0)} reach a third time through</div>`:''}</article>`}).join('')}
 
 /* ---------- bullpen ---------- */
 function renderBP(){const t=bpTeam(),D=DATA.bullpen[t];const T=D.tendencies;
-  const cols=[['Reliever',r=>full(r.name),null],['Role',r=>`<span class="pill">${r.role}</span>`,null],['G',r=>r.g,r=>r.g],['gmLI',r=>r.gmLI?.toFixed(2),r=>r.gmLI],['High-lev %',r=>pc(r.high_lev_pct,0),r=>r.high_lev_pct],['Save sit %',r=>pc(r.save_sit_pct,0),r=>r.save_sit_pct],['9th+ %',r=>pc(r.inn9_pct,0),r=>r.inn9_pct],['Multi-inn %',r=>pc(r.multi_inning_pct,0),r=>r.multi_inning_pct],['Pitches',r=>r.avg_pitches?.toFixed(1),r=>r.avg_pitches],['Inherited %',r=>pc(r.inherited_pct,0),r=>r.inherited_pct],['B2B apps',r=>r.b2b_apps,r=>r.b2b_apps],['Same-hand 1st %',r=>pc(r.same_hand_first_pct,0),r=>r.same_hand_first_pct],['K%',r=>pc(r.k_pct),r=>r.k_pct],['BB%',r=>pc(r.bb_pct),r=>-r.bb_pct],['xwOBA',r=>f3(r.xwoba),r=>-r.xwoba],['High-lev xwOBA',r=>f3(r.hl_xwoba),r=>-(r.hl_xwoba??1)],['B2B velo Δ',r=>r.b2b_velo_drop==null?'–':sg(r.b2b_velo_drop,1),r=>r.b2b_velo_drop??-9]];
+  const cols=[['Reliever',r=>full(r.name),null],['Role',r=>`<span class="pill">${r.role}</span>`,null],['G',r=>r.g,r=>r.g],['gmLI',r=>r.gmLI?.toFixed(2),r=>r.gmLI],['High-lev %',r=>pc(r.high_lev_pct,0),r=>r.high_lev_pct],['Save sit %',r=>pc(r.save_sit_pct,0),r=>r.save_sit_pct],['9th+ %',r=>pc(r.inn9_pct,0),r=>r.inn9_pct],['Multi-inn %',r=>pc(r.multi_inning_pct,0),r=>r.multi_inning_pct],['Pitches',r=>r.avg_pitches?.toFixed(1),r=>r.avg_pitches],['Inherited %',r=>pc(r.inherited_pct,0),r=>r.inherited_pct],['B2B apps',r=>r.b2b_apps,r=>r.b2b_apps],['Same-hand 1st %',r=>pc(r.same_hand_first_pct,0),r=>r.same_hand_first_pct],['Stuff+',r=>r.stuff_plus!=null?Math.round(r.stuff_plus):null,r=>r.stuff_plus],['K%',r=>pc(r.k_pct),r=>r.k_pct],['BB%',r=>pc(r.bb_pct),r=>-r.bb_pct],['xwOBA',r=>f3(r.xwoba),r=>-r.xwoba],['High-lev xwOBA',r=>f3(r.hl_xwoba),r=>-(r.hl_xwoba??1)],['B2B velo Δ',r=>r.b2b_velo_drop==null?'–':sg(r.b2b_velo_drop,1),r=>r.b2b_velo_drop??-9]];
   let sk=3;const draw=()=>{const P=[...T].sort((a,b)=>(cols[sk][2](b)??-9)-(cols[sk][2](a)??-9));$('#bp-tend').innerHTML=`<thead><tr>${cols.map((c,i)=>`<th class="${i>=2?'n':''}">${c[2]?`<button data-k="${i}">${c[0]}</button>`:c[0]}</th>`).join('')}</tr></thead><tbody>${P.map(r=>`<tr>${cols.map((c,i)=>`<td class="${i>=2?'n':''}">${c[1](r)??'–'}</td>`).join('')}</tr>`).join('')}</tbody>`};
   $('#bp-tend').onclick=e=>{const b=e.target.closest('th button');if(!b)return;sk=+b.dataset.k;draw()};draw();
   const states=[];for(const inn of [7,8,9])for(const lb of ['down 1-3','tied','up 1-3'])states.push([inn,lb]);
