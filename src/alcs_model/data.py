@@ -311,9 +311,14 @@ def pull_postseason_games(cfg: Config, verbose: bool = True) -> Path | None:
 
             def side(s):
                 t = box["teams"][s]
+                players = t.get("players", {})
+                counts = {}
+                for pid in t.get("pitchers", []):
+                    st = ((players.get(f"ID{pid}") or {}).get("stats") or {}).get("pitching") or {}
+                    counts[str(pid)] = st.get("numberOfPitches") or st.get("pitchesThrown")
                 return {"team": ID2ABBR.get(int(t["team"]["id"])),
                         "lineup": [int(x) for x in t.get("battingOrder", [])][:9],
-                        "pitchers": [int(x) for x in t.get("pitchers", [])]}
+                        "pitchers": [int(x) for x in t.get("pitchers", [])], "pitch_counts": counts}
             rows.append({
                 "game_pk": int(pk), "date": d["date"], "game_type": g.get("gameType"),
                 "label": f"{g.get('seriesDescription', '')} G{g.get('seriesGameNumber', '')}".strip(),
@@ -445,3 +450,84 @@ def pull_espn_odds(dates, season: int, verbose: bool = True) -> dict:
         have = sum(1 for v in cache.values() if v.get("lines", {}).get("p_home_close"))
         print(f"  ESPN odds: {new} new events, {have} of {len(cache)} cached events have a moneyline")
     return cache
+
+
+# ---------------------------------------------------------------- live bracket
+LEAGUE_IDS = {103: "AL", 104: "NL"}
+
+
+def pull_bracket(cfg: Config, verbose: bool = True) -> Path | None:
+    """Standings (for seeds) and every postseason game, played or scheduled, with probable pitchers."""
+    ensure_dirs()
+    if os.environ.get("ALCS_OFFLINE"):
+        return None
+    teams = []
+    for lid, lg in LEAGUE_IDS.items():
+        js = _get(f"{STATSAPI}/standings", {"leagueId": lid, "season": cfg.season,
+                                             "standingsTypes": "regularSeason"}).json()
+        for rec in js.get("records", []):
+            for t in rec.get("teamRecords", []):
+                teams.append({"team": ID2ABBR.get(int(t["team"]["id"])), "team_id": int(t["team"]["id"]),
+                              "name": t["team"].get("name"), "league": lg, "w": int(t["wins"]), "l": int(t["losses"]),
+                              "pct": float(t["winningPercentage"]), "division_rank": t.get("divisionRank"),
+                              "wildcard_rank": t.get("wildCardRank"), "clinch": t.get("clinchIndicator")})
+    js = _get(f"{STATSAPI}/schedule", {"sportId": 1, "season": cfg.season, "gameType": "F,D,L,W",
+                                        "hydrate": "probablePitcher,seriesStatus"}).json()
+    games = []
+    for d in js.get("dates", []):
+        for g in d["games"]:
+            def side(s):
+                t = g["teams"][s]
+                pp = t.get("probablePitcher") or {}
+                return {"team_id": int(t["team"]["id"]), "team": ID2ABBR.get(int(t["team"]["id"])),
+                        "name": t["team"].get("name"), "score": t.get("score"), "probable": pp.get("id"),
+                        "probable_name": pp.get("fullName")}
+            games.append({"game_pk": int(g["gamePk"]), "date": d["date"], "game_date": g.get("gameDate"),
+                          "game_type": g.get("gameType"), "description": g.get("description") or "",
+                          "series": g.get("seriesDescription"), "game_number": g.get("seriesGameNumber"),
+                          "games_in_series": g.get("gamesInSeries"), "status": g["status"].get("detailedState"),
+                          "abstract": g["status"].get("abstractGameState"), "if_necessary": g.get("ifNecessary"),
+                          "venue": (g.get("venue") or {}).get("name"), "home": side("home"), "away": side("away"),
+                          "series_status": (g.get("seriesStatus") or {}).get("result")})
+    path = DATA_RAW / f"bracket_{cfg.season}.json"
+    path.write_text(json.dumps({"pulled": datetime.now().isoformat(timespec="minutes"), "teams": teams,
+                                "games": games}, indent=1), encoding="utf-8")
+    if verbose:
+        print(f"  bracket: {len(teams)} teams, {len(games)} postseason games "
+              f"({sum(g['abstract'] == 'Final' for g in games)} final)")
+    return path
+
+
+def load_bracket(cfg: Config) -> dict | None:
+    path = DATA_RAW / f"bracket_{cfg.season}.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+def pull_espn_upcoming(dates, verbose: bool = True) -> dict:
+    """Current lines for games that have not started yet (not cached: they move until first pitch)."""
+    if os.environ.get("ALCS_OFFLINE"):
+        return {}
+    out = {}
+    for d in sorted({pd.Timestamp(x).strftime("%Y%m%d") for x in dates}):
+        try:
+            sb = _get(f"{ESPN}/scoreboard", {"dates": d, "limit": 50}).json()
+        except Exception as e:
+            print(f"  warning: ESPN scoreboard {d} failed ({e})")
+            continue
+        for ev in sb.get("events", []):
+            comp = ev["competitions"][0]
+            if comp.get("status", {}).get("type", {}).get("state") != "pre":
+                continue
+            teams = {c["homeAway"]: c["team"]["abbreviation"] for c in comp["competitors"]}
+            try:
+                s = _get(f"{ESPN}/summary", {"event": ev["id"]}).json()
+                lines = _parse_pick(s.get("pickcenter") or [])
+            except Exception:
+                lines = {}
+            if lines.get("p_home_close"):
+                out[str(ev["id"])] = {"date": f"{d[:4]}-{d[4:6]}-{d[6:]}", "start": ev.get("date"),
+                                      "home": ESPN_ABBR.get(teams.get("home"), teams.get("home")),
+                                      "away": ESPN_ABBR.get(teams.get("away"), teams.get("away")), "lines": lines}
+    if verbose:
+        print(f"  ESPN upcoming: lines for {len(out)} games")
+    return out

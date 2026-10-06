@@ -37,6 +37,7 @@ class GamePlan:
     venue: str
     starters: dict[str, dict]               # team -> {"starter", "opener_max_bf", "bulk"}
     day: date
+    away: str | None = None                 # needed when the context holds more than two teams
 
 
 @dataclass
@@ -234,7 +235,7 @@ def sim_game(ctx: SimContext, plan: GamePlan, fatigue: Fatigue, rng: np.random.G
              max_innings: int = 20) -> tuple[int, int]:
     """Returns (away_runs, home_runs)."""
     home = plan.home
-    away = next(t for t in ctx.teams if t != home)
+    away = plan.away or next(t for t in ctx.teams if t != home)
     staffs = {t: _Staff(ctx, t, plan.starters[t], plan.day, fatigue, rng) for t in (away, home)}
     orders = {}
     for t in (away, home):

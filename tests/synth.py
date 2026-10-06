@@ -22,9 +22,9 @@ CWS_SP = [696146, 641743, 680732, 663436, 702273]
 TB_SP = [656876, 642547, 607259, 643377, 693855]
 
 
-def make_league(seed: int = 7, n_days: int = 90, start: date = date(2026, 4, 1)) -> pd.DataFrame:
+def make_league(seed: int = 7, n_days: int = 90, start: date = date(2026, 4, 1), teams=None) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
-    teams = ["CWS", "TB", "CLE", "NYY", "HOU", "BOS"]
+    teams = list(teams or ["CWS", "TB", "CLE", "NYY", "HOU", "BOS"])
     hitters, pitchers, sp, rp = {}, {}, {}, {}
     nid = 900000
     for t in teams:

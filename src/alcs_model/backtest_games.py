@@ -31,7 +31,7 @@ from .config import OUTPUT, Config, ensure_dirs
 from .data import TEAM_IDS, load_leaderboard, load_postseason_games, pull_postseason_games
 from .features import OUTCOMES, leverage_table
 from .matchups import build_profiles, pair_edges
-from .pa_model import Rates, _logloss, _predict, batter_side, build_rates
+from .pa_model import Rates, _logloss, _predict, apply_stuff, batter_side, build_rates, stuff_setting
 from .simulate import Fatigue, GamePlan, SimContext, TeamSetup, sim_game
 
 ID2ABBR = {v: k for k, v in TEAM_IDS.items()}
@@ -132,7 +132,7 @@ class World:
 
     def __init__(self, cfg: Config, p_all: pd.DataFrame, p_train: pd.DataFrame, pa_train: pd.DataFrame,
                  tuned: dict | None, lam: float, pf: pd.DataFrame | None, verbose: bool = True,
-                 stuff_gamma: float = 0.0):
+                 stuff_mode: tuple[str, float] = ("none", 0.0)):
         m = cfg.model
         self.as_of = p_train["game_date"].max()
         hl = m.get("recent_half_life_days", 0)
@@ -141,11 +141,12 @@ class World:
             hl = tuned.get("half_life", hl)
             k = {o: v * tuned.get("shrink_mult", 1.0) for o, v in k.items()}
         self.rates = build_rates(pa_train, k, hl, self.as_of)
-        if stuff_gamma:
+        self.stuff_mode = stuff_mode
+        if stuff_mode[0] != "none":
             from .stuff import fit_stuff
             sm = fit_stuff(p_train[p_train["game_type"].astype(str).eq("R")], verbose=verbose)
-            self.rates.stuff = sm.ratings["rv100"].to_dict()
-            self.rates.gamma = stuff_gamma
+            self.rates = apply_stuff(self.rates, sm.ratings, stuff_mode[0], stuff_mode[1], pa_train, k, hl,
+                                     self.as_of)
         self.lam = lam
         self.profiles = build_profiles(p_train, m["shrink"], hl, self.as_of) if lam else None
         self.li = leverage_table(pa_train)
@@ -397,22 +398,22 @@ def pa_check(world: World, pa_test: pd.DataFrame) -> dict:
 def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFrame | None = None,
                   post_rows: list[dict] | None = None, post_sims: int = 4000, reg_sims: int = 300,
                   include_regular: bool = True, seed: int = 7, verbose: bool = True,
-                  odds: dict | None = None, post_factor: float = 1.0, stuff_gamma: float | None = None) -> dict:
+                  odds: dict | None = None, post_factor: float = 1.0,
+                  stuff_mode: tuple[str, float] | None = None) -> dict:
     from .market import match_odds, model_vs_market, totals_check
 
     bt_path = OUTPUT / "backtest.json"
     bt = json.loads(bt_path.read_text()) if bt_path.exists() else None
     tuned = bt.get("tuned") if bt else None
     lam = float(bt["lambda"]) if bt and bt.get("mix_gain_pct", 0) > 0 else 0.0
-    sg = float(bt["stuff"]["gamma"]) if bt and bt.get("stuff", {}).get("gain_pct", 0) > 0 else 0.0
-    if stuff_gamma is not None:
-        sg = stuff_gamma
+    sg = stuff_mode if stuff_mode is not None else stuff_setting(bt)
     boost = float(cfg.model.get("postseason_leverage_boost", 1.0))
     t0 = time.time()
     gt = p["game_type"].astype(str)
     pa_gt = pa["game_type"].astype(str)
     result = {"generated": time.strftime("%Y-%m-%d %H:%M"), "settings": {"post_sims": post_sims, "reg_sims": reg_sims,
-              "tuned": tuned, "lambda": lam, "postseason_boost": boost, "stuff_gamma": sg}}
+              "tuned": tuned, "lambda": lam, "postseason_boost": boost,
+              "stuff_mode": sg[0], "stuff_gamma": sg[1]}}
 
     # ---- postseason
     reg_p, reg_pa = p[gt.eq("R")], pa[pa_gt.eq("R")]

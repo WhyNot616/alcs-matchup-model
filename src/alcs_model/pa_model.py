@@ -42,8 +42,51 @@ def _counts(pa: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
     return t[OUTCOMES]
 
 
+def stuff_coefficients(pit_all: pd.DataFrame, lg_side_p: dict, stuff: dict, min_pa: float = 150) -> np.ndarray:
+    """How each outcome rate moves with stuff, across pitchers: log(rate / league) ~ b * stuff.
+
+    Weighted least squares through the origin, weights = plate appearances, using pitchers with at
+    least `min_pa`. Returns one coefficient per outcome (per run saved per 100 pitches of stuff)."""
+    rows = []
+    for (p, h), row in pit_all.iterrows():
+        n = row.sum()
+        sv = stuff.get(int(p))
+        if n < min_pa or sv is None:
+            continue
+        rate = (row.to_numpy() + 1.0) / (n + len(OUTCOMES))
+        rows.append((np.log(rate / lg_side_p[h]), sv, n))
+    if len(rows) < 20:
+        return np.zeros(len(OUTCOMES))
+    Y = np.vstack([r[0] for r in rows])
+    x = np.array([r[1] for r in rows])
+    w = np.array([r[2] for r in rows])
+    return (w * x) @ Y / ((w * x) @ x)
+
+
+def stuff_setting(bt: dict | None) -> tuple[str, float]:
+    """How the stuff model enters the rates, as chosen on the validation window of the PA backtest:
+    ("none", 0), ("tilt", gamma) or ("prior", 0)."""
+    st = (bt or {}).get("stuff") or {}
+    mode = st.get("mode") or ("tilt" if st.get("gain_pct", 0) > 0 else "none")
+    return mode, (float(st.get("gamma", 0.0)) if mode == "tilt" else 0.0)
+
+
+def apply_stuff(rates: Rates, ratings: pd.DataFrame | None, mode: str, gamma: float,
+                pa: pd.DataFrame, shrink_pa: dict, half_life: float, as_of) -> Rates:
+    """Return rates with stuff applied in the chosen mode."""
+    if ratings is None or mode == "none":
+        return rates
+    sv = {int(k): float(v) for k, v in ratings["rv100"].items()}
+    if mode == "prior":
+        return build_rates(pa, shrink_pa, half_life, as_of, stuff=sv)
+    rates.stuff, rates.gamma = sv, gamma
+    return rates
+
+
 def build_rates(pa: pd.DataFrame, shrink_pa: dict, half_life: float = 0,
-                as_of: pd.Timestamp | None = None) -> Rates:
+                as_of: pd.Timestamp | None = None, stuff: dict | None = None) -> Rates:
+    """`stuff` (pitcher -> stuff runs saved per 100) makes each pitcher's regression target depend on
+    his stuff instead of the league average, so stuff matters most where results are thinnest."""
     d = pa[pa["outcome"].isin(OUTCOMES)].copy()
     d["stand"] = d["stand"].astype(str)
     d["p_throws"] = d["p_throws"].astype(str)
@@ -84,8 +127,13 @@ def build_rates(pa: pd.DataFrame, shrink_pa: dict, half_life: float = 0,
     pit_all = _counts(d, ["pitcher", "p_throws"])
     pit_side = _counts(d, ["pitcher", "p_throws", "stand"])
     p_over = {}
+    coef = stuff_coefficients(pit_all, lg_side_p, stuff) if stuff else None
     for (p, h), row in pit_all.iterrows():
-        p_over[(p, h)] = shrink(row.to_numpy(), lg_side_p[h], k)
+        prior = lg_side_p[h]
+        if coef is not None and stuff.get(int(p)) is not None:
+            prior = prior * np.exp(coef * stuff[int(p)])
+            prior = prior / prior.sum()
+        p_over[(p, h)] = shrink(row.to_numpy(), prior, k)
     pitcher, pitcher_n = {}, {}
     for (p, h, s), row in pit_side.iterrows():
         ratio = league.get((s, h), lg_side_p[h]) / lg_side_p[h]
@@ -93,7 +141,9 @@ def build_rates(pa: pd.DataFrame, shrink_pa: dict, half_life: float = 0,
         prior = prior / prior.sum()
         pitcher[(int(p), s)] = shrink(row.to_numpy(), prior, k * 1.5)
         pitcher_n[(int(p), s)] = float(row.sum())
-    return Rates(league, batter, pitcher, batter_n, pitcher_n)
+    out = Rates(league, batter, pitcher, batter_n, pitcher_n)
+    out.stuff_coef = None if coef is None else [float(x) for x in coef]
+    return out
 
 
 def matchup_probs(rates: Rates, batter: int, bat_side: str, pitcher: int, p_throws: str,
@@ -203,6 +253,10 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         P = base_mix_val * np.where(GOOD[None, :], np.exp(-g * s_val[:, None]), np.exp(g * s_val[:, None]))
         g_scores[g] = _logloss(P / P.sum(1, keepdims=True), y_val)
     gamma_best = min(g_scores, key=g_scores.get)
+    # alternative: stuff as each pitcher's regression target (no tilt)
+    r_fit_sp = build_rates(fit_pa, shrink_pa, hl, val_start, stuff=sm_fit.ratings["rv100"].to_dict())
+    P_sp_val = _predict(r_fit_sp, val_pa, None, 0.0) * lam_tilt_val
+    prior_val = _logloss(P_sp_val / P_sp_val.sum(1, keepdims=True), y_val)
 
     # refit on all training data and score the test window
     r = build_rates(train, shrink_pa, hl, split)
@@ -218,6 +272,9 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     s_test = test["pitcher"].map(sm.ratings["rv100"]).fillna(0.0).to_numpy()
     P_stuff = P_mix * np.where(GOOD[None, :], np.exp(-gamma_best * s_test[:, None]), np.exp(gamma_best * s_test[:, None]))
     P_stuff = P_stuff / P_stuff.sum(1, keepdims=True)
+    r_sp = build_rates(train, shrink_pa, hl, split, stuff=sm.ratings["rv100"].to_dict())
+    P_sp = _predict(r_sp, test, None, 0.0) * tilt
+    P_sp = P_sp / P_sp.sum(1, keepdims=True)
     reg_pitch = pitches[pitches["game_type"].astype(str).eq("R")]
     stab = stability_check(reg_pitch, split)
 
@@ -238,7 +295,7 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     res = {
         "train_pa": int(len(train)), "test_pa": int(len(test)), "split": str(split.date()),
         "logloss": {"league": _logloss(P_lg, y), "oddsratio": _logloss(P_or, y), "oddsratio_mix": _logloss(P_mix, y),
-                    "with_stuff": _logloss(P_stuff, y)},
+                    "with_stuff": _logloss(P_stuff, y), "stuff_prior": _logloss(P_sp, y)},
         "lambda": lam_best, "lambda_validation": {str(k): v for k, v in val_scores.items()},
         "tuned": {"shrink_mult": best_mult, "half_life": hl,
                   "grid": [{"shrink_mult": m_, "half_life": h_, "logloss": v} for (m_, h_), v in tune.items()]},
@@ -251,7 +308,14 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     res["mix_gain_pct"] = 100 * (ll["oddsratio"] - ll["oddsratio_mix"]) / ll["oddsratio"]
     res["stuff"] = {"gamma": gamma_best, "validation": {str(k): v for k, v in g_scores.items()},
                     "gain_pct": 100 * (ll["oddsratio_mix"] - ll["with_stuff"]) / ll["oddsratio_mix"],
-                    "stability": stab, "rating_sd": sm.sd}
+                    "stability": stab, "rating_sd": sm.sd,
+                    "prior_validation": prior_val, "tilt_validation": g_scores[gamma_best],
+                    "prior_gain_pct": 100 * (ll["oddsratio_mix"] - ll["stuff_prior"]) / ll["oddsratio_mix"],
+                    "prior_coef": r_sp.stuff_coef}
+    # pick the stuff mode on validation (never on test)
+    base_val_ll = g_scores[0.0]
+    best = min([("none", base_val_ll), ("tilt", g_scores[gamma_best]), ("prior", prior_val)], key=lambda x: x[1])
+    res["stuff"]["mode"] = best[0]
     if verbose:
         print(f"Backtest: train {res['train_pa']:,} PA before {res['split']}, test {res['test_pa']:,} PA")
         for kname, v in ll.items():
@@ -259,13 +323,16 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         print(f"  talent model beats league-only by {res['skill_vs_league_pct']:.2f}%")
         print(f"  pitch-mix tilt (lambda={lam_best}) changes log loss by {res['mix_gain_pct']:+.3f}%")
         print(f"  corr(edge, wOBA residual) = {corr:+.4f}")
-        print(f"  stuff tilt (gamma={gamma_best}) changes log loss by {res['stuff']['gain_pct']:+.3f}%; stability {stab}")
+        print(f"  stuff tilt (gamma={gamma_best}) changes log loss by {res['stuff']['gain_pct']:+.3f}%; "
+              f"stuff prior by {res['stuff']['prior_gain_pct']:+.3f}%; chosen on validation: {res['stuff']['mode']}; "
+              f"stability {stab}")
         import os
         if os.environ.get("GITHUB_ACTIONS"):
             print("::notice title=backtest::" + "; ".join(f"{k} {v:.5f}" for k, v in ll.items())
                   + f"; lambda {lam_best}; mix gain {res['mix_gain_pct']:+.3f}%; corr {corr:+.4f}", flush=True)
             st = res["stuff"]
-            print(f"::notice title=stuff::gamma {gamma_best}; test gain {st['gain_pct']:+.3f}%; validation "
+            print(f"::notice title=stuff::mode {st['mode']}; prior gain {st['prior_gain_pct']:+.3f}% "
+                  f"(val {st['prior_validation']:.5f}); tilt gamma {gamma_best}; test gain {st['gain_pct']:+.3f}%; validation "
                   + ", ".join(f"{k}:{v:.5f}" for k, v in st["validation"].items())
                   + f"; stability {stab}", flush=True)
     return res

@@ -4,9 +4,11 @@
     alcs backtest                                  test whether the matchup model predicts anything
     alcs backtest-games [--no-regular]             predict real playoff and late-season games pregame and score them
     alcs history                                   fit the postseason run environment on 2021-2025 playoffs
-    alcs build [--n 5000] [--bootstrap 20]         fit, simulate, write output/ and docs/index.html
-    alcs render                                    rebuild docs/index.html from output/dashboard_data.json
-    alcs all                                       pull (incremental) + build
+    alcs build [--n 5000] [--bootstrap 20]         series deep dive: fit, simulate, write docs/series.html
+    alcs playoffs [--n 5000]                       whole bracket: series, pennant and title odds, next-game
+                                                   lines vs market, write docs/index.html
+    alcs render                                    rebuild both pages from saved output
+    alcs all                                       pull (incremental) + build + playoffs
 
 Run `python -m alcs_model <command>` if the `alcs` script is not on your PATH.
 """
@@ -39,7 +41,10 @@ def main(argv: list[str] | None = None) -> None:
         sp.add_argument("--seed", type=int, default=None)
         if name == "all":
             sp.add_argument("--scope", choices=["league", "teams"], default=None)
-    sub.add_parser("render", help="rebuild docs/index.html from saved data")
+    p_po = sub.add_parser("playoffs", help="simulate the whole remaining bracket and write the hub page")
+    p_po.add_argument("--n", type=int, default=5000, help="number of simulated postseasons")
+    p_po.add_argument("--seed", type=int, default=11)
+    sub.add_parser("render", help="rebuild docs/series.html and docs/index.html from saved data")
     a = ap.parse_args(argv)
     cfg = load_config(a.config)
 
@@ -65,9 +70,21 @@ def main(argv: list[str] | None = None) -> None:
             pull_all(cfg, scope=getattr(a, "scope", None))
         from .pipeline import run
         run(cfg, n_series=a.n, n_boot=a.bootstrap, skip_backtest=a.skip_backtest, seed=a.seed)
+        if a.cmd == "all":
+            from .playoffs import run as run_playoffs
+            run_playoffs(cfg)
+    elif a.cmd == "playoffs":
+        from .playoffs import run as run_playoffs
+        run_playoffs(cfg, n=a.n, seed=a.seed)
     elif a.cmd == "render":
+        from .config import DOCS
         from .pipeline import render
-        render()
+        if (OUTPUT / "dashboard_data.json").exists():
+            render()
+        if (OUTPUT / "bracket.json").exists():
+            from .playoffs import render as render_hub
+            render_hub()
+        print(f"rendered pages in {DOCS}")
 
 
 if __name__ == "__main__":

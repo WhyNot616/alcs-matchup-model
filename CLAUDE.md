@@ -5,7 +5,8 @@ Guide for Claude Code working in this repository.
 ## Project
 
 Python package `alcs_model` (src layout) that pulls Statcast data, fits a plate-appearance outcome model,
-measures bullpen usage, simulates a best-of-seven series PA by PA, and renders an HTML dashboard.
+measures bullpen usage, simulates games PA by PA, and renders two pages: the postseason hub
+(`docs/index.html`, whole bracket) and a two-team series deep dive (`docs/series.html`).
 Owner: Ami Argentar (Statistics, UIUC). Config-driven: `config/series.yaml` holds teams, schedule,
 rotations, lineups, bullpen overrides and model parameters.
 
@@ -14,7 +15,8 @@ rotations, lineups, bullpen overrides and model parameters.
 - Install: `pip install -e ".[dev]"` (Python 3.10+)
 - Tests: `ALCS_OFFLINE=1 pytest` (synthetic data in `tests/synth.py`, no network)
 - Pull data: `python -m alcs_model pull [--scope league|teams] [--refresh]`
-- Build: `python -m alcs_model build [--n 5000] [--bootstrap 20] [--skip-backtest]`
+- Build the deep dive: `python -m alcs_model build [--n 5000] [--bootstrap 20] [--skip-backtest]`
+- Simulate the bracket and write the hub: `python -m alcs_model playoffs [--n 5000]`
 - Quick build while iterating: `python -m alcs_model build --n 300 --bootstrap 0 --skip-backtest`
 - Re-render the HTML only: `python -m alcs_model render`
 - Game-level backtest: `python -m alcs_model backtest-games [--no-regular] [--post-sims 4000] [--reg-sims 300]`
@@ -33,8 +35,12 @@ rotations, lineups, bullpen overrides and model parameters.
   `output/game_backtest.json`, which `render()` merges into the dashboard
 - `postseason_env.py`: actual vs expected scoring in past postseasons; `load_factor` feeds the simulator
 - `market.py`: matches ESPN/DraftKings lines to games, `model_vs_market` regression, `totals_check`
-- `pipeline.py`: `run()` orchestrates everything and writes `output/dashboard_data.json` + `docs/index.html`
-- `dashboard/template.html`: the dashboard; `__DATA__` is replaced with the JSON at render time
+- `stuff.py`: pitch-quality model and Stuff+; `pa_model.stuff_setting(bt)` returns the mode chosen on validation
+- `pipeline.py`: `run()` builds the deep dive, writes `output/dashboard_data.json` + `docs/series.html`
+- `playoffs.py`: `build_state` (series grouped by round + team pair; LCS/WS by league), `feeder` (WC -> DS),
+  `simulate_bracket`, `bracket()`, `run()`; writes `output/bracket.json` + `docs/index.html`.
+  Optional overrides in `config/playoffs.yaml`
+- `dashboard/template.html` (deep dive) and `dashboard/playoffs.html` (hub); `__DATA__` is replaced with JSON
 
 ## Conventions
 
@@ -57,5 +63,6 @@ rotations, lineups, bullpen overrides and model parameters.
   baserunning rules in `_advance` change.
 - The game backtest must stay leak-free: anything about a game (lineups, starters, bullpen, fatigue) may
   only use data dated before that game, and models are fit on the training window only.
+- Stuff, pitch-mix and shrinkage settings are chosen on the PA backtest's validation window, never its test window.
 - Market lines are a benchmark only. Never feed them into the model's own predictions, or the
   comparison stops meaning anything.

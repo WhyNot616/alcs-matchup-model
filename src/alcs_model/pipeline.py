@@ -17,7 +17,7 @@ from .data import load_leaderboard, load_schedule, load_statcast, lookup_names
 from .features import (OUTCOMES, active_players, leverage_table, plate_appearances, player_names,
                        prepare_pitches)
 from .matchups import build_profiles, matchup_detail, pair_edges
-from .pa_model import backtest, batter_side, build_rates, expected_woba, matchup_probs
+from .pa_model import apply_stuff, backtest, batter_side, build_rates, expected_woba, matchup_probs, stuff_setting
 from .simulate import GamePlan, SimContext, TeamSetup, calibrate, calibrate_scoring, sim_series
 
 
@@ -47,9 +47,10 @@ def load_prepared(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None = None,
-        stuff_gamma: float = 0.0, stuff_ratings: pd.DataFrame | None = None) -> Fitted:
+        stuff_mode: tuple[str, float] = ("none", 0.0), stuff_ratings: pd.DataFrame | None = None) -> Fitted:
     """Fit outcome rates and pitch profiles. `tuned` (from the backtest) overrides shrinkage and recency.
-    With stuff_gamma > 0 the stuff model is fit too (or `stuff_ratings` reused) and feeds the rates."""
+    `stuff_mode` is ("none" | "tilt" | "prior", gamma) from `stuff_setting`; stuff ratings are always
+    fit (or reused from `stuff_ratings`) for the dashboard cards."""
     m = cfg.model
     as_of = pitches["game_date"].max()
     hl = m.get("recent_half_life_days", 0)
@@ -61,13 +62,11 @@ def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None
     prof = build_profiles(pitches, m["shrink"], hl, as_of)
     li = leverage_table(pa)
     F = Fitted(pitches, pa, rates, prof, li, as_of)
-    if stuff_ratings is None and (stuff_gamma or cfg.model.get("always_rate_stuff", True)):
+    if stuff_ratings is None and (stuff_mode[0] != "none" or cfg.model.get("always_rate_stuff", True)):
         from .stuff import fit_stuff
         stuff_ratings = fit_stuff(pitches[pitches["game_type"].astype(str).eq("R")]).ratings
     F.stuff = stuff_ratings
-    if stuff_ratings is not None and stuff_gamma:
-        rates.stuff = stuff_ratings["rv100"].to_dict()
-        rates.gamma = stuff_gamma
+    F.rates = apply_stuff(rates, stuff_ratings, stuff_mode[0], stuff_mode[1], pa, k_pa, hl, as_of)
     return F
 
 
@@ -187,9 +186,9 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
     elif bt_path.exists():
         bt = json.loads(bt_path.read_text())
     tuned = bt.get("tuned") if bt else None
-    stuff_gamma = float(bt["stuff"]["gamma"]) if bt and bt.get("stuff", {}).get("gain_pct", 0) > 0 else 0.0
-    F = fit(cfg, p, pa, tuned, stuff_gamma)
-    _log(f"stuff tilt gamma = {stuff_gamma}", t0)
+    stuff_mode = stuff_setting(bt)
+    F = fit(cfg, p, pa, tuned, stuff_mode)
+    _log(f"stuff mode = {stuff_mode[0]} (gamma {stuff_mode[1]})", t0)
     _log("fit rates and pitch profiles" + (f" (shrink x{tuned['shrink_mult']}, half-life {tuned['half_life']})" if tuned else ""), t0)
     lam = float(bt["lambda"]) if bt and bt.get("mix_gain_pct", 0) > 0 else 0.0
     _log(f"pitch-mix lambda = {lam}", t0)
@@ -262,7 +261,7 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             # game-level bootstrap via weights: a game drawn twice counts twice in every rate
             pb = p[p["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
             pab = pa[pa["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
-            Fb = fit(cfg, pb, pab, tuned, stuff_gamma, F.stuff)
+            Fb = fit(cfg, pb, pab, tuned, stuff_mode, F.stuff)
             Fb.li = F.li
             cb, plb = build_sim_context(cfg, Fb, ros, bats, throws, lam, pf_mult, boost)
             cb.scoring_tilt = ctx.scoring_tilt
@@ -316,11 +315,12 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
                 c["stuff_plus"] = sp.get(int(c["id"]))
             for r in data["bullpen"][t]["tendencies"]:
                 r["stuff_plus"] = sp.get(int(r["pitcher"]))
-        data["meta"]["stuff_gamma"] = stuff_gamma
+        data["meta"]["stuff_mode"] = stuff_mode[0]
+        data["meta"]["stuff_gamma"] = stuff_mode[1]
     _log("aggregates", t0)
     (OUTPUT / "dashboard_data.json").write_text(json.dumps(data, default=_json_default))
     render(data)
-    _log(f"wrote {OUTPUT / 'dashboard_data.json'} and {DOCS / 'index.html'}", t0)
+    _log(f"wrote {OUTPUT / 'dashboard_data.json'} and {DOCS / 'series.html'}", t0)
     return data
 
 
@@ -354,4 +354,11 @@ def render(data: dict | None = None) -> None:
     html = tmpl.replace("__DATA__", blob)
     if not html.lstrip().lower().startswith("<!doctype"):
         html = "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" + html + "\n</html>"
-    (DOCS / "index.html").write_text(html, encoding="utf-8")
+    (DOCS / "series.html").write_text(html, encoding="utf-8")
+    # the postseason hub is the landing page; refresh it so it picks up new backtest results and the
+    # series link. Without a bracket yet, the series page doubles as the landing page.
+    if (OUTPUT / "bracket.json").exists():
+        from .playoffs import render as render_hub
+        render_hub()
+    else:
+        (DOCS / "index.html").write_text(html, encoding="utf-8")

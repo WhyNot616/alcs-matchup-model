@@ -1,8 +1,10 @@
 name: refresh model
 
-# Pulls the latest Statcast data, rebuilds the model and simulation, and commits the dashboard
-# (docs/index.html, served by GitHub Pages) and output/*.json. Run it from the Actions tab
-# ("Run workflow"), or let the schedule run it every morning in October.
+# Pulls the latest Statcast data, rebuilds the model, simulates the whole remaining postseason and
+# commits the pages (docs/index.html = postseason hub, docs/series.html = series deep dive, served by
+# GitHub Pages) and output/*.json. Run it from the Actions tab ("Run workflow").
+# Schedule: a full run every morning through the World Series, plus a quick afternoon run that only
+# re-simulates the bracket, to pick up announced starters and posted betting lines.
 on:
   workflow_dispatch:
     inputs:
@@ -17,8 +19,19 @@ on:
       bootstrap:
         description: "bootstrap resamples for the uncertainty range"
         default: "20"
+      mode:
+        description: "full (backtests + deep dive + bracket) or bracket (pull + bracket only, about 15 minutes)"
+        default: full
+        type: choice
+        options: [full, bracket]
+      n_playoffs:
+        description: "simulated postseasons for the bracket"
+        default: "5000"
   schedule:
-    - cron: "0 11 * 10 *"   # 6am Central, every day in October
+    - cron: "0 11 * 10 *"     # 6am Central, every day in October: full run
+    - cron: "0 11 1-7 11 *"   # and the first week of November, in case the World Series runs long
+    - cron: "0 19 * 10 *"     # 2pm Central: bracket only, for announced starters and lines
+    - cron: "0 19 1-7 11 *"
 
 permissions:
   contents: write
@@ -30,6 +43,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FAST: ${{ inputs.mode == 'bracket' || github.event.schedule == '0 19 * 10 *' || github.event.schedule == '0 19 1-7 11 *' }}
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
@@ -53,23 +68,31 @@ jobs:
           path: data/raw
           key: savant-${{ inputs.scope || 'league' }}-${{ github.run_id }}
       - name: Postseason run environment (2021-2025)
+        if: env.FAST != 'true'
         run: |
           set -o pipefail
           python -m alcs_model history 2>&1 | tee env.log || { tail -25 env.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
           grep -E "factor|so far" env.log | while IFS= read -r l; do echo "::notice title=history::$l"; done
       - name: Plate-appearance backtest (picks shrinkage, pitch-mix and stuff weights)
+        if: env.FAST != 'true'
         run: |
           set -o pipefail
           python -m alcs_model backtest 2>&1 | tee pa.log || { tail -25 pa.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
       - name: Game-level backtest (playoffs + late season)
+        if: env.FAST != 'true'
         run: |
           set -o pipefail
           python -m alcs_model backtest-games 2>&1 | tee bt.log || { tail -25 bt.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
       - name: Build model, simulate, render dashboard
+        if: env.FAST != 'true'
         run: |
           sed -i "s/^  league_scope: .*/  league_scope: ${{ inputs.scope || 'league' }}/" config/series.yaml
           python -m alcs_model build --skip-backtest --n ${{ inputs.n_series || '5000' }} --bootstrap ${{ inputs.bootstrap || '20' }}
           git checkout config/series.yaml
+      - name: Simulate the whole bracket, render the postseason hub
+        run: |
+          set -o pipefail
+          python -m alcs_model playoffs --n ${{ inputs.n_playoffs || '5000' }} 2>&1 | tee po.log || { tail -25 po.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
       - name: Save caches added during the run (market lines, past scores)
         if: always()
         uses: actions/cache/save@v4
@@ -81,12 +104,14 @@ jobs:
           name: model-output
           path: |
             output/
-            docs/index.html
+            docs/
       - name: Commit results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f docs/index.html output/dashboard_data.json output/backtest.json output/game_backtest.json output/postseason_env.json
+          for f in docs/index.html docs/series.html docs/.nojekyll output/bracket.json output/dashboard_data.json output/backtest.json output/game_backtest.json output/postseason_env.json; do
+            [ -e "$f" ] && git add -f "$f"
+          done
           git diff --cached --quiet && exit 0
           git commit -m "Refresh model output ($(date -u +%Y-%m-%d))"
           git pull --rebase -X theirs origin main

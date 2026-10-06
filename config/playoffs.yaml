@@ -1,0 +1,12 @@
+# Optional hand overrides for the bracket simulation (alcs playoffs). Everything here is optional:
+# without it, rotations and lineups come from each team's most recent games and probable starters
+# from MLB. Ids are MLBAM ids (the number in a player's Baseball Savant URL).
+
+# rotation:                 # starters in order; used once announced probables run out
+#   TB: [656876, 642547, 607259, 643377]
+# lineups:                  # nine ids, against right- and left-handed starters
+#   CWS:
+#     vs_R: []
+#     vs_L: []
+exclude_pitchers:
+  - 663556   # McClanahan (forearm), not on the postseason roster
