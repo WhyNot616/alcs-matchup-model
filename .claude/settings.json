@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pytest)",
+      "Bash(pytest *)",
+      "Bash(ALCS_OFFLINE=1 pytest)",
+      "Bash(ALCS_OFFLINE=1 pytest *)",
+      "Bash(python -m pytest *)",
+      "Bash(python -m alcs_model *)",
+      "Bash(alcs *)",
+      "Bash(ruff check *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(gh run list *)",
+      "Bash(gh run view *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(gh workflow run *)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git add data/raw*)",
+      "Read(./data/raw/**/*.csv)",
+      "Read(./data/raw/**/*.parquet)"
+    ]
+  }
+}

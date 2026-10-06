@@ -8,6 +8,7 @@
     alcs playoffs [--n 5000]                       whole bracket: series, pennant and title odds, next-game
                                                    lines vs market, write docs/index.html
     alcs render                                    rebuild both pages from saved output
+    alcs who "<name>"                              find a player's MLBAM id (for config overrides)
     alcs all                                       pull (incremental) + build + playoffs
 
 Run `python -m alcs_model <command>` if the `alcs` script is not on your PATH.
@@ -45,6 +46,8 @@ def main(argv: list[str] | None = None) -> None:
     p_po.add_argument("--n", type=int, default=5000, help="number of simulated postseasons")
     p_po.add_argument("--seed", type=int, default=11)
     sub.add_parser("render", help="rebuild docs/series.html and docs/index.html from saved data")
+    p_who = sub.add_parser("who", help="find a player's MLBAM id by name")
+    p_who.add_argument("name", nargs="+")
     a = ap.parse_args(argv)
     cfg = load_config(a.config)
 
@@ -76,6 +79,13 @@ def main(argv: list[str] | None = None) -> None:
     elif a.cmd == "playoffs":
         from .playoffs import run as run_playoffs
         run_playoffs(cfg, n=a.n, seed=a.seed)
+    elif a.cmd == "who":
+        from .data import search_people
+        rows = search_people(" ".join(a.name))
+        for pid, nm, src in rows:
+            print(f"{pid}\t{nm}\t({src})")
+        if not rows:
+            print("no match")
     elif a.cmd == "render":
         from .config import DOCS
         from .pipeline import render

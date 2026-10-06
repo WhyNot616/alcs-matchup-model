@@ -10,6 +10,18 @@ measures bullpen usage, simulates games PA by PA, and renders two pages: the pos
 Owner: Ami Argentar (Statistics, UIUC). Config-driven: `config/series.yaml` holds teams, schedule,
 rotations, lineups, bullpen overrides and model parameters.
 
+Read `NOTES.md` first: current status, what the backtests found, decisions, and known limitations.
+Update it when a refresh or experiment changes those findings.
+
+@NOTES.md
+
+## Working with Ami
+
+- Blunt, critical feedback on the model. If something does not beat the baselines or the market, say so.
+- Ask before pushing, dispatching the GitHub workflow, or starting the 30-minute first data pull.
+- Project skills: `/refresh [bracket|full]`, `/pin <team> <change>`, `/game-preview <team>`,
+  `/model-check`, `/new-series <T1> <T2>` (in `.claude/skills/`).
+
 ## Commands
 
 - Install: `pip install -e ".[dev]"` (Python 3.10+)
@@ -19,6 +31,7 @@ rotations, lineups, bullpen overrides and model parameters.
 - Simulate the bracket and write the hub: `python -m alcs_model playoffs [--n 5000]`
 - Quick build while iterating: `python -m alcs_model build --n 300 --bootstrap 0 --skip-backtest`
 - Re-render the HTML only: `python -m alcs_model render`
+- Find a player's MLBAM id: `python -m alcs_model who "Rasmussen"`
 - Game-level backtest: `python -m alcs_model backtest-games [--no-regular] [--post-sims 4000] [--reg-sims 300]`
 - Postseason run environment: `python -m alcs_model history` (writes `output/postseason_env.json`)
 

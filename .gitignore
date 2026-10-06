@@ -22,3 +22,6 @@ dist/
 !.vscode/extensions.json
 .DS_Store
 .ipynb_checkpoints/
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json

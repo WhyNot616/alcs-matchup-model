@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-from .config import DATA_RAW, Config, ensure_dirs
+from .config import DATA_RAW, ROOT, Config, ensure_dirs
 
 SAVANT = "https://baseballsavant.mlb.com"
 STATSAPI = "https://statsapi.mlb.com/api/v1"
@@ -255,6 +255,36 @@ def pull_all(cfg: Config, scope: str | None = None, refresh: bool = False) -> No
 
 
 # ---------------------------------------------------------------- player names
+def search_people(query: str, limit: int = 10) -> list[tuple[int, str, str]]:
+    """Find MLBAM ids by name: local caches first (people.json, the bracket), then the MLB Stats API.
+    Returns (id, 'Last, First', source) rows."""
+    q = query.lower().replace(",", " ").split()
+    hits: dict[int, tuple[str, str]] = {}
+
+    def check(pid, name, src):
+        n = str(name).lower().replace(",", " ")
+        if all(w in n for w in q):
+            hits.setdefault(int(pid), (str(name), src))
+    cache = DATA_RAW / "people.json"
+    if cache.exists():
+        for k, v in json.loads(cache.read_text(encoding="utf-8")).items():
+            check(k, v, "cache")
+    bj = ROOT / "output" / "bracket.json"
+    if bj.exists():
+        for k, v in (json.loads(bj.read_text(encoding="utf-8")).get("names") or {}).items():
+            check(k, v, "bracket")
+    if len(hits) < limit and not os.environ.get("ALCS_OFFLINE"):
+        try:
+            js = _get(f"{STATSAPI}/people/search", {"names": query, "sportIds": 1}).json()
+            for p in js.get("people", []):
+                last, first = p.get("lastName", ""), p.get("useName") or p.get("firstName", "")
+                team = (p.get("currentTeam") or {}).get("id")
+                hits.setdefault(int(p["id"]), (f"{last}, {first}", f"MLB API{f', team {ID2ABBR.get(team, team)}' if team else ''}"))
+        except Exception as e:
+            print(f"  warning: MLB people search failed ({e})")
+    return [(k, v[0], v[1]) for k, v in list(hits.items())[:limit]]
+
+
 def lookup_names(ids, cache_path: Path | None = None) -> dict[int, str]:
     """MLBAM id -> 'Last, First' via the MLB Stats API, cached on disk.
 

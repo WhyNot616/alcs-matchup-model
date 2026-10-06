@@ -101,10 +101,24 @@ Pages, deploy from branch `main`, folder `/docs`) to get a public link to the da
 
 ## Working with Claude Code
 
-`CLAUDE.md` describes the project layout, commands and conventions so Claude Code can work in the
-repo from the terminal (`claude` in the project folder). Useful asks: "update the rotation for Game 3
-and rebuild", "add a split for pitches with runners in scoring position", "why does the backtest say
-the pitch-mix tilt does not help?".
+The repo is set up as a Claude Code project. Open a terminal in the folder and run `claude` (or use the
+Claude Code extension in VS Code). It reads:
+
+- `CLAUDE.md`: layout, commands, conventions and gotchas
+- `NOTES.md`: current status, backtest findings, decisions and known limitations
+- `.claude/settings.json`: tests, the `alcs` commands and read-only git commands run without asking;
+  pushing and dispatching the workflow ask first; force pushes and committing raw data are blocked
+- `.claude/skills/`: project commands
+
+| Command | What it does |
+|---|---|
+| `/refresh [bracket\|full]` | pull new data, re-simulate, summarize what moved, publish on request |
+| `/pin <team> <change>` | pin a starter, lineup or excluded pitcher in `config/playoffs.yaml` and re-simulate |
+| `/game-preview <team>` | short preview of a team's next game: starters, model vs market, how much to trust it |
+| `/model-check` | run the tests and an honest read of every backtest |
+| `/new-series <T1> <T2>` | point the deep dive at another matchup (the real ALCS, NLCS or World Series) |
+
+`alcs who "<name>"` looks up a player's MLBAM id for any of the config files.
 
 ## How to read the model check
 

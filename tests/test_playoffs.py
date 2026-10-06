@@ -145,3 +145,13 @@ def test_render_hub(setup, cfg, tmp_path, monkeypatch, capsys):
     assert "—" not in html  # house style: no em dashes
     po._report(res)
     assert "title odds" in capsys.readouterr().out
+
+
+def test_house_style_no_em_dashes():
+    """Dashboard templates, docs and project skills must not contain em dashes."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    files = list((root / "dashboard").glob("*.html")) + list((root / ".claude").rglob("*.md")) + \
+        [root / "README.md", root / "NOTES.md", root / "CLAUDE.md"]
+    bad = [str(f.relative_to(root)) for f in files if f.exists() and "—" in f.read_text(encoding="utf-8")]
+    assert not bad, f"em dashes in {bad}"
