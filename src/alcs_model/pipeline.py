@@ -29,6 +29,7 @@ class Fitted:
     profiles: object
     li: pd.DataFrame
     as_of: pd.Timestamp
+    stuff: pd.DataFrame | None = None     # pitcher -> n, rv100, stuff_plus
 
 
 def _log(msg: str, t0: float) -> None:
@@ -45,8 +46,10 @@ def load_prepared(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame]:
     return p, pa
 
 
-def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None = None) -> Fitted:
-    """Fit outcome rates and pitch profiles. `tuned` (from the backtest) overrides shrinkage and recency."""
+def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None = None,
+        stuff_gamma: float = 0.0, stuff_ratings: pd.DataFrame | None = None) -> Fitted:
+    """Fit outcome rates and pitch profiles. `tuned` (from the backtest) overrides shrinkage and recency.
+    With stuff_gamma > 0 the stuff model is fit too (or `stuff_ratings` reused) and feeds the rates."""
     m = cfg.model
     as_of = pitches["game_date"].max()
     hl = m.get("recent_half_life_days", 0)
@@ -57,7 +60,15 @@ def fit(cfg: Config, pitches: pd.DataFrame, pa: pd.DataFrame, tuned: dict | None
     rates = build_rates(pa, k_pa, hl, as_of)
     prof = build_profiles(pitches, m["shrink"], hl, as_of)
     li = leverage_table(pa)
-    return Fitted(pitches, pa, rates, prof, li, as_of)
+    F = Fitted(pitches, pa, rates, prof, li, as_of)
+    if stuff_ratings is None and (stuff_gamma or cfg.model.get("always_rate_stuff", True)):
+        from .stuff import fit_stuff
+        stuff_ratings = fit_stuff(pitches[pitches["game_type"].astype(str).eq("R")]).ratings
+    F.stuff = stuff_ratings
+    if stuff_ratings is not None and stuff_gamma:
+        rates.stuff = stuff_ratings["rv100"].to_dict()
+        rates.gamma = stuff_gamma
+    return F
 
 
 def rosters(cfg: Config, p: pd.DataFrame) -> dict:
@@ -176,7 +187,9 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
     elif bt_path.exists():
         bt = json.loads(bt_path.read_text())
     tuned = bt.get("tuned") if bt else None
-    F = fit(cfg, p, pa, tuned)
+    stuff_gamma = float(bt["stuff"]["gamma"]) if bt and bt.get("stuff", {}).get("gain_pct", 0) > 0 else 0.0
+    F = fit(cfg, p, pa, tuned, stuff_gamma)
+    _log(f"stuff tilt gamma = {stuff_gamma}", t0)
     _log("fit rates and pitch profiles" + (f" (shrink x{tuned['shrink_mult']}, half-life {tuned['half_life']})" if tuned else ""), t0)
     lam = float(bt["lambda"]) if bt and bt.get("mix_gain_pct", 0) > 0 else 0.0
     _log(f"pitch-mix lambda = {lam}", t0)
@@ -249,7 +262,7 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             # game-level bootstrap via weights: a game drawn twice counts twice in every rate
             pb = p[p["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
             pab = pa[pa["game_pk"].isin(counts.index)].assign(bw=lambda x: x["game_pk"].map(counts).astype(float))
-            Fb = fit(cfg, pb, pab, tuned)
+            Fb = fit(cfg, pb, pab, tuned, stuff_gamma, F.stuff)
             Fb.li = F.li
             cb, plb = build_sim_context(cfg, Fb, ros, bats, throws, lam, pf_mult, boost)
             cb.scoring_tilt = ctx.scoring_tilt
@@ -296,6 +309,14 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
         "rosters": {t: {k: v for k, v in ros[t].items()} for t in cfg.teams},
         "config": {"schedule": cfg["schedule"], "rotation": cfg["rotation"], "lineups": cfg["lineups"]},
     }
+    if F.stuff is not None:
+        sp = F.stuff["stuff_plus"].round(0).to_dict()
+        for t in cfg.teams:
+            for c in data["pitchers"][t]:
+                c["stuff_plus"] = sp.get(int(c["id"]))
+            for r in data["bullpen"][t]["tendencies"]:
+                r["stuff_plus"] = sp.get(int(r["pitcher"]))
+        data["meta"]["stuff_gamma"] = stuff_gamma
     _log("aggregates", t0)
     (OUTPUT / "dashboard_data.json").write_text(json.dumps(data, default=_json_default))
     render(data)

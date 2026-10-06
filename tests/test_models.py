@@ -34,6 +34,7 @@ def test_profiles_and_edges(cfg, pitches):
 def test_backtest_runs(cfg, pitches, pa):
     res = backtest(pitches, pa, cfg.model, verbose=False)
     ll = res["logloss"]
-    assert set(ll) == {"league", "oddsratio", "oddsratio_mix"}
+    assert set(ll) == {"league", "oddsratio", "oddsratio_mix", "with_stuff"}
+    assert "gamma" in res["stuff"] and "stability" in res["stuff"]
     # synthetic hitters/pitchers have real talent differences, so talent should beat league-only
     assert ll["oddsratio"] < ll["league"]

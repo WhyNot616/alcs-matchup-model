@@ -57,6 +57,10 @@ jobs:
           set -o pipefail
           python -m alcs_model history 2>&1 | tee env.log || { tail -25 env.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
           grep -E "factor|so far" env.log | while IFS= read -r l; do echo "::notice title=history::$l"; done
+      - name: Plate-appearance backtest (picks shrinkage, pitch-mix and stuff weights)
+        run: |
+          set -o pipefail
+          python -m alcs_model backtest 2>&1 | tee pa.log || { tail -25 pa.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
       - name: Game-level backtest (playoffs + late season)
         run: |
           set -o pipefail
@@ -64,7 +68,7 @@ jobs:
       - name: Build model, simulate, render dashboard
         run: |
           sed -i "s/^  league_scope: .*/  league_scope: ${{ inputs.scope || 'league' }}/" config/series.yaml
-          python -m alcs_model build --n ${{ inputs.n_series || '5000' }} --bootstrap ${{ inputs.bootstrap || '20' }}
+          python -m alcs_model build --skip-backtest --n ${{ inputs.n_series || '5000' }} --bootstrap ${{ inputs.bootstrap || '20' }}
           git checkout config/series.yaml
       - name: Save caches added during the run (market lines, past scores)
         if: always()

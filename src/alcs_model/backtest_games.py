@@ -131,7 +131,8 @@ class World:
     """Everything the simulator needs, fit on a training window."""
 
     def __init__(self, cfg: Config, p_all: pd.DataFrame, p_train: pd.DataFrame, pa_train: pd.DataFrame,
-                 tuned: dict | None, lam: float, pf: pd.DataFrame | None, verbose: bool = True):
+                 tuned: dict | None, lam: float, pf: pd.DataFrame | None, verbose: bool = True,
+                 stuff_gamma: float = 0.0):
         m = cfg.model
         self.as_of = p_train["game_date"].max()
         hl = m.get("recent_half_life_days", 0)
@@ -140,6 +141,11 @@ class World:
             hl = tuned.get("half_life", hl)
             k = {o: v * tuned.get("shrink_mult", 1.0) for o, v in k.items()}
         self.rates = build_rates(pa_train, k, hl, self.as_of)
+        if stuff_gamma:
+            from .stuff import fit_stuff
+            sm = fit_stuff(p_train[p_train["game_type"].astype(str).eq("R")], verbose=verbose)
+            self.rates.stuff = sm.ratings["rv100"].to_dict()
+            self.rates.gamma = stuff_gamma
         self.lam = lam
         self.profiles = build_profiles(p_train, m["shrink"], hl, self.as_of) if lam else None
         self.li = leverage_table(pa_train)
@@ -391,23 +397,26 @@ def pa_check(world: World, pa_test: pd.DataFrame) -> dict:
 def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFrame | None = None,
                   post_rows: list[dict] | None = None, post_sims: int = 4000, reg_sims: int = 300,
                   include_regular: bool = True, seed: int = 7, verbose: bool = True,
-                  odds: dict | None = None, post_factor: float = 1.0) -> dict:
+                  odds: dict | None = None, post_factor: float = 1.0, stuff_gamma: float | None = None) -> dict:
     from .market import match_odds, model_vs_market, totals_check
 
     bt_path = OUTPUT / "backtest.json"
     bt = json.loads(bt_path.read_text()) if bt_path.exists() else None
     tuned = bt.get("tuned") if bt else None
     lam = float(bt["lambda"]) if bt and bt.get("mix_gain_pct", 0) > 0 else 0.0
+    sg = float(bt["stuff"]["gamma"]) if bt and bt.get("stuff", {}).get("gain_pct", 0) > 0 else 0.0
+    if stuff_gamma is not None:
+        sg = stuff_gamma
     boost = float(cfg.model.get("postseason_leverage_boost", 1.0))
     t0 = time.time()
     gt = p["game_type"].astype(str)
     pa_gt = pa["game_type"].astype(str)
     result = {"generated": time.strftime("%Y-%m-%d %H:%M"), "settings": {"post_sims": post_sims, "reg_sims": reg_sims,
-              "tuned": tuned, "lambda": lam, "postseason_boost": boost}}
+              "tuned": tuned, "lambda": lam, "postseason_boost": boost, "stuff_gamma": sg}}
 
     # ---- postseason
     reg_p, reg_pa = p[gt.eq("R")], pa[pa_gt.eq("R")]
-    W = World(cfg, p, reg_p, reg_pa, tuned, lam, pf, verbose)
+    W = World(cfg, p, reg_p, reg_pa, tuned, lam, pf, verbose, sg)
     post_pks = set(p.loc[~gt.eq("R"), "game_pk"])
     specs = {s.game_pk: s for s in specs_from_statcast(p, post_pks)}
     for s in specs_from_boxscores(post_rows or []):    # boxscores fill gaps and are the source of truth for scores
@@ -461,7 +470,7 @@ def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFra
         split = pd.Timestamp(cfg.model["backtest_split"])
         tr_p, tr_pa = p[gt.eq("R") & (p["game_date"] < split)], pa[pa_gt.eq("R") & (pa["game_date"] < split)]
         test_pks = set(p.loc[gt.eq("R") & (p["game_date"] >= split), "game_pk"])
-        W2 = World(cfg, p, tr_p, tr_pa, tuned, lam, pf, verbose)
+        W2 = World(cfg, p, tr_p, tr_pa, tuned, lam, pf, verbose, sg)
         reg = sorted(specs_from_statcast(p, test_pks), key=lambda s: (s.day, s.game_pk))
         result["regular_calibration"] = W2.calibrate_scoring(reg, seed=seed, verbose=verbose)
         for i, s in enumerate(reg):

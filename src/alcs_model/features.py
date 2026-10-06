@@ -31,7 +31,7 @@ NUMERIC = ["release_speed", "zone", "balls", "strikes", "outs_when_up", "inning"
            "post_home_score", "post_away_score", "post_bat_score", "n_thruorder_pitcher",
            "pitcher_days_since_prev_game", "at_bat_number", "pitch_number", "pfx_x", "pfx_z",
            "release_spin_rate", "release_extension", "arm_angle", "plate_x", "plate_z", "batter", "pitcher",
-           "game_pk", "on_1b", "on_2b", "on_3b"]
+           "game_pk", "on_1b", "on_2b", "on_3b", "release_pos_x", "release_pos_z", "spin_axis"]
 
 
 def prepare_pitches(raw: pd.DataFrame) -> pd.DataFrame:

@@ -12,7 +12,7 @@ The backtest decides whether that tilt earns its place.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -30,6 +30,8 @@ class Rates:
     pitcher: dict[tuple[int, str], np.ndarray]    # (pitcher, stand) -> probs
     batter_n: dict[tuple[int, str], float]
     pitcher_n: dict[tuple[int, str], float]
+    stuff: dict[int, float] = field(default_factory=dict)   # pitcher -> stuff runs saved per 100 (stuff.py)
+    gamma: float = 0.0                                        # weight of the stuff tilt (chosen in backtest)
 
 
 def _counts(pa: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
@@ -104,6 +106,10 @@ def matchup_probs(rates: Rates, batter: int, bat_side: str, pitcher: int, p_thro
     x = b * p / lg
     if lam and edge:
         x = x * np.where(GOOD, np.exp(lam * edge), np.exp(-lam * edge))
+    if rates.gamma:
+        sv = rates.stuff.get(int(pitcher))
+        if sv:
+            x = x * np.where(GOOD, np.exp(-rates.gamma * sv), np.exp(rates.gamma * sv))
     if park is not None:
         x = x * park
     return x / x.sum()
@@ -185,6 +191,19 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         val_scores[lam] = _logloss(P, y_val)
     lam_best = min(val_scores, key=val_scores.get)
 
+    # pitch quality: choose the weight of the stuff tilt on the same validation window
+    from .stuff import fit_stuff, stability_check
+    sm_fit = fit_stuff(fit_pitch[fit_pitch["game_type"].astype(str).eq("R")], verbose=verbose)
+    s_val = val_pa["pitcher"].map(sm_fit.ratings["rv100"]).fillna(0.0).to_numpy()
+    lam_tilt_val = np.where(GOOD[None, :], np.exp(lam_best * e_val[:, None]), np.exp(-lam_best * e_val[:, None]))
+    base_mix_val = base_val * lam_tilt_val
+    base_mix_val = base_mix_val / base_mix_val.sum(1, keepdims=True)
+    g_scores = {}
+    for g in [0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4]:
+        P = base_mix_val * np.where(GOOD[None, :], np.exp(-g * s_val[:, None]), np.exp(g * s_val[:, None]))
+        g_scores[g] = _logloss(P / P.sum(1, keepdims=True), y_val)
+    gamma_best = min(g_scores, key=g_scores.get)
+
     # refit on all training data and score the test window
     r = build_rates(train, shrink_pa, hl, split)
     prof = build_profiles(pitches[pitches["game_date"] < split], shrink, hl, split)
@@ -195,6 +214,12 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     P_mix = P_mix / P_mix.sum(1, keepdims=True)
     P_lg = np.vstack([r.league.get((s, h), np.mean(list(r.league.values()), axis=0))
                       for s, h in zip(test["stand"], test["p_throws"])])
+    sm = fit_stuff(pitches[(pitches["game_date"] < split) & pitches["game_type"].astype(str).eq("R")], verbose=verbose)
+    s_test = test["pitcher"].map(sm.ratings["rv100"]).fillna(0.0).to_numpy()
+    P_stuff = P_mix * np.where(GOOD[None, :], np.exp(-gamma_best * s_test[:, None]), np.exp(gamma_best * s_test[:, None]))
+    P_stuff = P_stuff / P_stuff.sum(1, keepdims=True)
+    reg_pitch = pitches[pitches["game_type"].astype(str).eq("R")]
+    stab = stability_check(reg_pitch, split)
 
     w = np.array([WOBA_W[o] for o in OUTCOMES])
     act = w[y]
@@ -212,7 +237,8 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
 
     res = {
         "train_pa": int(len(train)), "test_pa": int(len(test)), "split": str(split.date()),
-        "logloss": {"league": _logloss(P_lg, y), "oddsratio": _logloss(P_or, y), "oddsratio_mix": _logloss(P_mix, y)},
+        "logloss": {"league": _logloss(P_lg, y), "oddsratio": _logloss(P_or, y), "oddsratio_mix": _logloss(P_mix, y),
+                    "with_stuff": _logloss(P_stuff, y)},
         "lambda": lam_best, "lambda_validation": {str(k): v for k, v in val_scores.items()},
         "tuned": {"shrink_mult": best_mult, "half_life": hl,
                   "grid": [{"shrink_mult": m_, "half_life": h_, "logloss": v} for (m_, h_), v in tune.items()]},
@@ -223,6 +249,9 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
     ll = res["logloss"]
     res["skill_vs_league_pct"] = 100 * (ll["league"] - ll["oddsratio"]) / ll["league"]
     res["mix_gain_pct"] = 100 * (ll["oddsratio"] - ll["oddsratio_mix"]) / ll["oddsratio"]
+    res["stuff"] = {"gamma": gamma_best, "validation": {str(k): v for k, v in g_scores.items()},
+                    "gain_pct": 100 * (ll["oddsratio_mix"] - ll["with_stuff"]) / ll["oddsratio_mix"],
+                    "stability": stab, "rating_sd": sm.sd}
     if verbose:
         print(f"Backtest: train {res['train_pa']:,} PA before {res['split']}, test {res['test_pa']:,} PA")
         for kname, v in ll.items():
@@ -230,8 +259,13 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         print(f"  talent model beats league-only by {res['skill_vs_league_pct']:.2f}%")
         print(f"  pitch-mix tilt (lambda={lam_best}) changes log loss by {res['mix_gain_pct']:+.3f}%")
         print(f"  corr(edge, wOBA residual) = {corr:+.4f}")
+        print(f"  stuff tilt (gamma={gamma_best}) changes log loss by {res['stuff']['gain_pct']:+.3f}%; stability {stab}")
         import os
         if os.environ.get("GITHUB_ACTIONS"):
             print("::notice title=backtest::" + "; ".join(f"{k} {v:.5f}" for k, v in ll.items())
                   + f"; lambda {lam_best}; mix gain {res['mix_gain_pct']:+.3f}%; corr {corr:+.4f}", flush=True)
+            st = res["stuff"]
+            print(f"::notice title=stuff::gamma {gamma_best}; test gain {st['gain_pct']:+.3f}%; validation "
+                  + ", ".join(f"{k}:{v:.5f}" for k, v in st["validation"].items())
+                  + f"; stability {stab}", flush=True)
     return res
