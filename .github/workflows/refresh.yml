@@ -39,13 +39,19 @@ jobs:
           cache: pip
       - run: pip install -e .
       - name: Restore Statcast cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/raw
           key: savant-${{ inputs.scope || 'league' }}-${{ github.run_id }}
           restore-keys: savant-${{ inputs.scope || 'league' }}-
       - name: Pull data (incremental)
         run: python -m alcs_model pull --scope ${{ inputs.scope || 'league' }}
+      - name: Save Statcast cache (even if the build fails later)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw
+          key: savant-${{ inputs.scope || 'league' }}-${{ github.run_id }}
       - name: Build model, simulate, render dashboard
         run: |
           sed -i "s/^  league_scope: .*/  league_scope: ${{ inputs.scope || 'league' }}/" config/series.yaml
