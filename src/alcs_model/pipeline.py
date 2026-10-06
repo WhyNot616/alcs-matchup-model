@@ -317,6 +317,9 @@ def _json_default(o):
 def render(data: dict | None = None) -> None:
     if data is None:
         data = json.loads((OUTPUT / "dashboard_data.json").read_text())
+    gb = OUTPUT / "game_backtest.json"
+    if gb.exists():
+        data["game_backtest"] = json.loads(gb.read_text())
     tmpl = DASHBOARD_TEMPLATE.read_text(encoding="utf-8")
     blob = json.dumps(data, default=_json_default, ensure_ascii=False, separators=(",", ":"))
     blob = blob.replace("</", "<\\/")

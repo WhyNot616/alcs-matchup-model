@@ -281,3 +281,52 @@ def lookup_names(ids, cache_path: Path | None = None) -> dict[int, str]:
         ensure_dirs()
         cache_path.write_text(json.dumps(cache), encoding="utf-8")
     return {int(k): v for k, v in cache.items()}
+
+
+# ---------------------------------------------------------------- postseason boxscores
+ID2ABBR = {v: k for k, v in TEAM_IDS.items()}
+
+
+def pull_postseason_games(cfg: Config, verbose: bool = True) -> Path | None:
+    """Final postseason games with batting orders and starters from MLB boxscores.
+
+    Used by the game backtest so playoff games can be scored even before Savant has their pitches.
+    """
+    ensure_dirs()
+    if os.environ.get("ALCS_OFFLINE"):
+        return None
+    js = _get(f"{STATSAPI}/schedule", {"sportId": 1, "season": cfg.season, "gameType": "F,D,L,W"}).json()
+    rows = []
+    for d in js.get("dates", []):
+        for g in d["games"]:
+            st = g.get("status", {})
+            if st.get("abstractGameState") != "Final" or st.get("detailedState") in ("Postponed", "Cancelled"):
+                continue
+            pk = g["gamePk"]
+            try:
+                box = _get(f"{STATSAPI}/game/{pk}/boxscore").json()
+            except Exception as e:
+                print(f"  warning: boxscore {pk} failed ({e})")
+                continue
+
+            def side(s):
+                t = box["teams"][s]
+                return {"team": ID2ABBR.get(int(t["team"]["id"])),
+                        "lineup": [int(x) for x in t.get("battingOrder", [])][:9],
+                        "pitchers": [int(x) for x in t.get("pitchers", [])]}
+            rows.append({
+                "game_pk": int(pk), "date": d["date"], "game_type": g.get("gameType"),
+                "label": f"{g.get('seriesDescription', '')} G{g.get('seriesGameNumber', '')}".strip(),
+                "venue": g["venue"]["name"], "home": side("home"), "away": side("away"),
+                "home_runs": g["teams"]["home"].get("score"), "away_runs": g["teams"]["away"].get("score"),
+            })
+    path = DATA_RAW / f"postseason_games_{cfg.season}.json"
+    path.write_text(json.dumps(rows, indent=1), encoding="utf-8")
+    if verbose:
+        print(f"  postseason games: {len(rows)} final")
+    return path
+
+
+def load_postseason_games(cfg: Config) -> list[dict]:
+    path = DATA_RAW / f"postseason_games_{cfg.season}.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []

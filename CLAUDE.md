@@ -17,6 +17,7 @@ rotations, lineups, bullpen overrides and model parameters.
 - Build: `python -m alcs_model build [--n 5000] [--bootstrap 20] [--skip-backtest]`
 - Quick build while iterating: `python -m alcs_model build --n 300 --bootstrap 0 --skip-backtest`
 - Re-render the HTML only: `python -m alcs_model render`
+- Game-level backtest: `python -m alcs_model backtest-games [--no-regular] [--post-sims 4000] [--reg-sims 300]`
 
 ## Layout
 
@@ -27,6 +28,8 @@ rotations, lineups, bullpen overrides and model parameters.
 - `bullpen.py`: `appearances`, `reliever_tendencies`, `situational_splits`, `starter_hooks`, `UsageModel`
 - `simulate.py`: `sim_game`, `sim_series`, baserunning in `_advance`, fatigue across dates
 - `aggregates.py`: raw descriptive tables for the dashboard (field order in `FIELDS`)
+- `backtest_games.py`: `World` (model fit on a training window), `game_backtest`, `score_games`; writes
+  `output/game_backtest.json`, which `render()` merges into the dashboard
 - `pipeline.py`: `run()` orchestrates everything and writes `output/dashboard_data.json` + `docs/index.html`
 - `dashboard/template.html`: the dashboard; `__DATA__` is replaced with the JSON at render time
 
@@ -49,3 +52,5 @@ rotations, lineups, bullpen overrides and model parameters.
 - The backtest needs league scope; with `teams` scope one side of most PAs has a tiny sample.
 - `home_pa_tilt` was calibrated so identical teams give the home side about 53.5%; recheck if the
   baserunning rules in `_advance` change.
+- The game backtest must stay leak-free: anything about a game (lineups, starters, bullpen, fatigue) may
+  only use data dated before that game, and models are fit on the training window only.

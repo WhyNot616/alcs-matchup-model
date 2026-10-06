@@ -152,7 +152,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
 
 <div id="tip" role="status" aria-live="polite"></div>
 <nav class="nav" aria-label="Sections"><div class="wrap">
-  <a href="#summary">Summary</a><a href="#pitchmix">Pitch mix</a><a href="#hitters">Hitter vs starter</a><a href="#zones">Zones</a><a href="#platoon">Platoon</a><a href="#starters">Starters</a><a href="#bullpen">Bullpens</a><a href="#defense">Defense &amp; park</a><a href="#conditions">Conditions</a><a href="#sim">Simulation</a><a href="#check">Model check</a><a href="#method">Method</a>
+  <a href="#summary">Summary</a><a href="#pitchmix">Pitch mix</a><a href="#hitters">Hitter vs starter</a><a href="#zones">Zones</a><a href="#platoon">Platoon</a><a href="#starters">Starters</a><a href="#bullpen">Bullpens</a><a href="#defense">Defense &amp; park</a><a href="#conditions">Conditions</a><a href="#sim">Simulation</a><a href="#check">Model check</a><a href="#games-bt">Playoff backtest</a><a href="#method">Method</a>
 </div></nav>
 
 <div class="wrap">
@@ -275,8 +275,19 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:v
   <div class="panel"><h3>Calibration of the talent model</h3><p class="small muted" style="margin-bottom:8px">Test plate appearances binned by expected wOBA. Points on the diagonal mean the model's probabilities are honest.</p><div id="bt-cal"></div></div>
 </section>
 
+<section class="s" id="games-bt">
+  <div class="s-head"><div class="eyebrow">11 · Track record</div><h2>Backtest on real games: the 2026 playoffs and the late regular season</h2></div>
+  <div class="read"><p>Each game below was predicted using only what was known before first pitch: that day's batting orders and starting pitchers, each bullpen as it stood over the previous 30 days, real bullpen fatigue from the previous two days, and a model fit on earlier games only. Playoff games use a model fit on the full regular season. The late-season test fits on games before the split date and predicts every game after it.</p><p>Brier score is the average squared error of the win probability (lower is better, a coin flip scores .250). The baselines use the same pregame information: home field alone, and log5 matchups of each team's win percentage or Pythagorean record, each with home field.</p><p id="gb-read"></p></div>
+  <div class="panel" style="display:grid;gap:12px"><h3>Every playoff game so far</h3><div class="scroll"><table id="gb-games"></table></div><p class="small muted">Model and Pythagorean columns are the home team's pregame win probability. A call is right when the side given more than 50% won.</p></div>
+  <div class="grid2">
+    <div class="panel"><h3>Scores by predictor</h3><div class="scroll"><table id="gb-metrics"></table></div><p class="small muted" style="margin-top:6px">Bold marks the best score in each column.</p></div>
+    <div class="panel"><h3>Is the model really better?</h3><p class="small muted" style="margin-bottom:8px">Model Brier minus baseline Brier with a 95% bootstrap interval over games. Left of zero means the model was better. An interval crossing zero means the sample cannot tell them apart.</p><div id="gb-ci"></div></div>
+  </div>
+  <div class="panel" id="gb-cal-panel"><h3>Calibration on late-season games</h3><p class="small muted" style="margin-bottom:8px">Games grouped by the model's home win probability. Points on the diagonal mean the probabilities were honest.</p><div id="gb-cal"></div></div>
+</section>
+
 <section class="s" id="method">
-  <div class="s-head"><div class="eyebrow">11 · Method</div><h2>Method, definitions and caveats</h2></div>
+  <div class="s-head"><div class="eyebrow">12 · Method</div><h2>Method, definitions and caveats</h2></div>
   <div class="read small">
     <p><b>Data.</b> Every pitch of the season from Baseball Savant's Statcast search, plus Savant's Outs Above Average, sprint speed, catcher framing, baserunning and park factor leaderboards, and the MLB Stats API schedule (day/night, venue, temperature). The pipeline pulls, caches and refreshes them incrementally.</p>
     <p><b>Run value.</b> Change in run expectancy per pitch, summed per 100 pitches. Hitter view: positive means runs for the offense. Pitcher view: positive means runs saved. The model uses expected run value, which swaps each ball in play's actual result for its xwOBA, removing most defense and luck.</p>
@@ -466,6 +477,41 @@ function renderBT(){const bt=DATA.backtest;if(!bt){$('#bt-read').textContent='No
   const helps=bt.mix_gain_pct>0;
   $('#bt-read').innerHTML=`Trained on ${bt.train_pa.toLocaleString()} plate appearances before ${bt.split}, tested on ${bt.test_pa.toLocaleString()} after it. <b>The talent-and-platoon model beats league averages by ${bt.skill_vs_league_pct.toFixed(2)}%</b> in log loss, which is the normal size of the gain in baseball: single plate appearances are mostly noise. <b>The pitch-mix tilt ${helps?`improves the model by another ${bt.mix_gain_pct.toFixed(3)}%`:'does not improve it'}</b>${helps?`, with a tilt of ${bt.lambda} chosen on a separate validation window, so it is ${bt.mix_gain_pct>0.05?'kept in the model':'kept in the model but its effect is small'}.`:', so the simulator sets it to zero and the pitch-mix tables are descriptive only.'} The correlation between the arsenal edge and what the talent model misses is ${sg(bt.edge_resid_corr,3)}. ${bt.tuned?`The same validation window picked the regression strength (${bt.tuned.shrink_mult}x the config constants) and a recency half-life of ${bt.tuned.half_life||'no'} days.`:''}`}
 
+
+/* ---------- game backtest ---------- */
+const GBN={model:'Model (simulation)',coin:'Coin flip',home:'Home field only',log5_wpct:'Log5, win %',log5_pythag:'Log5, Pythagorean'};
+function renderGB(){const G=DATA.game_backtest;const sec=$('#games-bt');if(!G){sec.hidden=true;return}sec.hidden=false;
+  const P=G.postseason||{games:[]},R=G.regular;const games=P.games||[];
+  const sname=(g,t)=>short((g.starter_names&&g.starter_names[t])||nameOf(g.starters[t]));
+  $('#gb-games').innerHTML=games.length?`<thead><tr><th>Date</th><th>Series</th><th>Matchup</th><th>Starters</th><th class="n">Model</th><th class="n">Pythag</th><th>Final</th><th>Call</th></tr></thead><tbody>`+games.map(g=>{const hw=g.home_runs>g.away_runs;const right=(g.p_home>.5)===hw;const fav=g.p_home>=.5?g.home:g.away;
+    return `<tr><td class="mono">${g.date.slice(5)}</td><td>${g.label||''}</td><td>${g.away} @ ${g.home}</td><td>${sname(g,g.away)} vs ${sname(g,g.home)}</td><td class="n" data-tip="Expected runs ${g.away} ${g.exp_away}, ${g.home} ${g.exp_home}">${pc(g.p_home,0)}</td><td class="n">${g.baselines.log5_pythag!=null?pc(g.baselines.log5_pythag,0):'–'}</td><td class="mono">${g.away} ${g.away_runs}, ${g.home} ${g.home_runs}</td><td><span class="pill" style="border-color:${right?'var(--good)':'var(--crit)'}">${right?'✓ Right':'✗ Wrong'} · ${fav}</span></td></tr>`}).join('')+'</tbody>':'<tbody><tr><td>No completed playoff games in the data yet.</td></tr></tbody>';
+  const sets=[['Playoffs',P.metrics],['Late season',R&&R.metrics]].filter(x=>x[1]);const keys=Object.keys(GBN).filter(k=>sets.some(x=>x[1][k]));
+  const best=(m,f,lo)=>{const v=keys.map(k=>m[k]?m[k][f]:null).filter(x=>x!=null);return lo?Math.min(...v):Math.max(...v)};
+  $('#gb-metrics').innerHTML=`<thead><tr><th>Predictor</th>${sets.map(([n,m])=>`<th class="n">${n} Brier</th><th class="n">Log loss</th><th class="n">Right</th>`).join('')}</tr></thead><tbody>`+keys.map(k=>`<tr><td>${GBN[k]}</td>${sets.map(([n,m])=>{const x=m[k];if(!x)return '<td class="n">–</td><td class="n">–</td><td class="n">–</td>';const b=f=>x[f]===best(m,f,f!=='accuracy')?'font-weight:700':'';return `<td class="n" style="${b('brier')}">${x.brier.toFixed(4)}</td><td class="n" style="${b('logloss')}">${x.logloss.toFixed(4)}</td><td class="n" style="${b('accuracy')}">${pc(x.accuracy,1)}</td>`}).join('')}</tr>`).join('')+`</tbody><tfoot><tr><td class="muted small">Games</td>${sets.map(([n,m])=>`<td class="n muted small" colspan="3">${m.model.n}</td>`).join('')}</tr></tfoot>`;
+  // interval plot
+  const rows=[];for(const [n,obj] of [['Playoffs',P],['Late season',R]]){if(!obj||!obj.vs_model)continue;for(const k of ['coin','home','log5_wpct','log5_pythag']){const v=obj.vs_model[k];if(v)rows.push([n,k,v])}}
+  if(rows.length){const lim=Math.max(.01,...rows.map(r=>Math.max(Math.abs(r[2].lo),Math.abs(r[2].hi))));const W=520,rh=26,top=10,lw=190,H=top+rows.length*rh+30;const X=v=>lw+(v+lim)/(2*lim)*(W-lw-16);
+    let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Brier differences"><line x1="${X(0)}" x2="${X(0)}" y1="${top-4}" y2="${H-24}" stroke="${css('--ink-3')}" stroke-dasharray="3 3"/>`;
+    rows.forEach((r,i)=>{const y=top+i*rh+rh/2;const c=r[2].hi<0?css('--good'):r[2].lo>0?css('--crit'):css('--ink-2');
+      sv+=`<text x="${lw-8}" y="${y+4}" font-size="11" text-anchor="end" fill="${css('--ink')}">${r[0]} vs ${GBN[r[1]].toLowerCase()}</text><line x1="${X(r[2].lo)}" x2="${X(r[2].hi)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="2"/><circle cx="${X(r[2].brier_diff)}" cy="${y}" r="5" fill="${c}" stroke="${css('--surface')}" stroke-width="2" data-tip="${r[0]} vs ${GBN[r[1]]}: ${sg(r[2].brier_diff,4)} (95% ${sg(r[2].lo,4)} to ${sg(r[2].hi,4)}), model better in ${pc(r[2].p_model_better,0)} of resamples"/>`});
+    [-lim,0,lim].forEach(v=>sv+=`<text x="${X(v)}" y="${H-8}" font-size="10" text-anchor="middle" fill="${css('--ink-3')}">${sg(v,3)}</text>`);
+    $('#gb-ci').innerHTML=sv+'</svg>'}else $('#gb-ci').textContent='Not enough games yet.';
+  // calibration
+  const C=R&&R.calibration;$('#gb-cal-panel').hidden=!C;
+  if(C){const W=520,H=240,pd=40;const lo=.25,hi=.8;const X=v=>pd+(v-lo)/(hi-lo)*(W-2*pd),Y=v=>H-pd-(v-lo)/(hi-lo)*(H-2*pd);
+    let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Calibration of game probabilities"><line x1="${X(lo)}" y1="${Y(lo)}" x2="${X(hi)}" y2="${Y(hi)}" stroke="${css('--line-2')}" stroke-dasharray="4 4"/>`;
+    for(let v=.3;v<=.8001;v+=.1){sv+=`<text x="${X(v)}" y="${H-pd+16}" font-size="10" text-anchor="middle" fill="${css('--ink-3')}">${Math.round(v*100)}%</text><text x="${pd-6}" y="${Y(v)+4}" font-size="10" text-anchor="end" fill="${css('--ink-3')}">${Math.round(v*100)}%</text>`}
+    C.forEach(c=>{const r=Math.max(4,Math.min(12,Math.sqrt(c.n)/2));sv+=`<circle cx="${X(Math.min(hi,Math.max(lo,c.pred)))}" cy="${Y(Math.min(hi,Math.max(lo,c.actual)))}" r="${r}" fill="${css('--accent')}" fill-opacity=".8" stroke="${css('--surface')}" stroke-width="2" data-tip="Predicted ${pc(c.pred,1)}, home team won ${pc(c.actual,1)} of ${c.n} games"/>`});
+    $('#gb-cal').innerHTML=sv+`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="${css('--ink-3')}">model home win probability</text></svg>`}
+  // read
+  const txt=[];
+  if(games.length){const m=P.metrics,right=games.filter(g=>(g.p_home>.5)===(g.home_runs>g.away_runs)).length;const v=P.vs_model&&P.vs_model.log5_pythag;
+    txt.push(`<b>Playoffs:</b> the model picked the winner in ${right} of ${games.length} games. Its Brier score was ${f3(m.model.brier)}, against ${m.log5_pythag?f3(m.log5_pythag.brier):'–'} for the Pythagorean baseline and .250 for a coin flip.`+(v?` The 95% interval on the difference with the Pythagorean baseline runs from ${sg(v.lo,3)} to ${sg(v.hi,3)}, ${v.lo<0&&v.hi>0?`so ${games.length} games cannot separate the two. Treat the playoff record as anecdote.`:v.hi<0?'so the model was clearly better even on this small sample.':'so the baseline was clearly better on this sample.'}`:''))}
+  if(R&&R.metrics){const m=R.metrics,v=R.vs_model.log5_pythag,f=R.favorites;
+    txt.push(`<b>Late season (${R.n_games} games from ${R.split}):</b> Brier ${m.model.brier.toFixed(4).replace(/^0/,'')} for the model, ${m.log5_pythag.brier.toFixed(4).replace(/^0/,'')} for the Pythagorean baseline, ${m.home.brier.toFixed(4).replace(/^0/,'')} for home field alone. The model ${v.hi<0?'beat':'did not clearly beat'} the Pythagorean baseline (difference ${sg(v.brier_diff,4)}, 95% interval ${sg(v.lo,4)} to ${sg(v.hi,4)}).`+(f?` Its favorites were given ${pc(f.mean_fav_prob,1)} on average and won ${pc(f.fav_win_rate,1)} of the time${Math.abs(f.mean_fav_prob-f.fav_win_rate)>.02?(f.mean_fav_prob>f.fav_win_rate?', so it is overconfident and its probabilities should be pulled toward 50%.':', so it is underconfident.'):', which is well calibrated.'}`:''))}
+  txt.push('Neither test includes the betting market, which is the benchmark a front office would actually care about.');
+  $('#gb-read').innerHTML=txt.join(' ')}
+
 /* ---------- summary ---------- */
 function renderSummary(){const S=DATA.sim,hs=DATA.meta.higher_seed,pA=S.p_win[A],pB=S.p_win[B];const fav=pA>=pB?A:B,pf=Math.max(pA,pB);
   $('#hdr-eyebrow').textContent=`Advance scouting model · ${DATA.meta.season} · data through ${DATA.meta.as_of}`;
@@ -500,8 +546,8 @@ function renderSummary(){const S=DATA.sim,hs=DATA.meta.higher_seed,pA=S.p_win[A]
 const stTeam=seg('#st-team',TEAMS.map(t=>[t,TN[t]]),renderST);
 const bpTeam=seg('#bp-team',TEAMS.map(t=>[t,TN[t]]),renderBP);
 $('#mx-ramp').style.background=`linear-gradient(90deg,${css('--cold')},${css('--mid')},${css('--hot')})`;
-function renderAll(){renderSummary();renderPM();renderMX();renderZ();renderPL();renderST();renderBP();renderDF();renderCD();renderSIM();renderBT()}
+function renderAll(){renderSummary();renderPM();renderMX();renderZ();renderPL();renderST();renderBP();renderDF();renderCD();renderSIM();renderBT();renderGB()}
 renderAll();
-new MutationObserver(()=>{$('#mx-ramp').style.background=`linear-gradient(90deg,${css('--cold')},${css('--mid')},${css('--hot')})`;renderMX();renderZ();renderBP();drawLines();renderBT()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+new MutationObserver(()=>{$('#mx-ramp').style.background=`linear-gradient(90deg,${css('--cold')},${css('--mid')},${css('--hot')})`;renderMX();renderZ();renderBP();drawLines();renderBT();renderGB()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{renderMX();renderZ();renderBP();drawLines();renderBT()})}catch(e){}
 </script>

@@ -51,7 +51,7 @@ class SimContext:
     scoring_tilt: float = 0.0                   # global run-environment calibration (see calibrate_scoring)
 
     def cum_probs(self, batter: int, pitcher: int, bat_team: str, venue: str, is_home: bool) -> np.ndarray:
-        key = (batter, pitcher, venue, is_home)
+        key = (batter, pitcher, bat_team, venue, is_home)
         c = self.cache.get(key)
         if c is not None:
             return c

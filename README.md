@@ -17,6 +17,7 @@ Everything is driven by one config file, so the same code works for any two team
 | Outcome model | `pa_model.py` | Probabilities of K, BB, 1B, 2B, 3B, HR and outs for any plate appearance (multinomial odds ratio with platoon splits), plus a pitch-mix tilt. Includes a backtest. |
 | Bullpens | `bullpen.py` | Every relief appearance with entry inning, score, leverage, rest and results. Roles, situational splits, starter hook patterns, and a usage model of which reliever each manager calls in each situation. |
 | Simulation | `simulate.py` | Plays games PA by PA: outcome draws, baserunning, starter hooks, bullpen choices and fatigue across the series calendar, postseason extra-inning rules. Bootstraps the season for an uncertainty range. |
+| Game backtest | `backtest_games.py` | Predicts real games from pregame information only (actual lineups and starters, recent bullpens, real fatigue) and scores them against coin flip, home field and log5 baselines with bootstrap intervals. |
 | Report | `pipeline.py`, `aggregates.py` | Runs it all and writes `output/dashboard_data.json` and `docs/index.html`. |
 
 ## Setup (VS Code)
@@ -39,7 +40,8 @@ alcs pull                 # first run: every 2026 pitch, about 30 minutes; later
 alcs pull --scope teams   # faster alternative: only games involving the two teams (no backtest)
 alcs build                # fit, backtest, simulate 5,000 series + 20 bootstrap reruns, write the dashboard
 alcs build --n 500 --bootstrap 0 --skip-backtest   # quick iteration while editing
-alcs backtest             # just the model check
+alcs backtest             # plate-appearance model check
+alcs backtest-games       # predict every 2026 playoff game and every game after Aug 1 pregame, then score them
 alcs render               # rebuild docs/index.html from the last saved output
 alcs all                  # pull new data, then build
 ```

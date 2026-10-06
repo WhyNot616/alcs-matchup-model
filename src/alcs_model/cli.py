@@ -2,6 +2,7 @@
 
     alcs pull [--scope league|teams] [--refresh]   download Statcast, leaderboards and schedule
     alcs backtest                                  test whether the matchup model predicts anything
+    alcs backtest-games [--no-regular]             predict real playoff and late-season games pregame and score them
     alcs build [--n 5000] [--bootstrap 20]         fit, simulate, write output/ and docs/index.html
     alcs render                                    rebuild docs/index.html from output/dashboard_data.json
     alcs all                                       pull (incremental) + build
@@ -23,7 +24,11 @@ def main(argv: list[str] | None = None) -> None:
     p_pull = sub.add_parser("pull", help="download data")
     p_pull.add_argument("--scope", choices=["league", "teams"], default=None)
     p_pull.add_argument("--refresh", action="store_true", help="re-download everything instead of only new dates")
-    sub.add_parser("backtest", help="run the backtest only")
+    sub.add_parser("backtest", help="run the plate-appearance backtest only")
+    p_bg = sub.add_parser("backtest-games", help="game-level backtest on playoff and late-season games")
+    p_bg.add_argument("--post-sims", type=int, default=4000, help="simulations per postseason game")
+    p_bg.add_argument("--reg-sims", type=int, default=300, help="simulations per regular-season test game")
+    p_bg.add_argument("--no-regular", action="store_true", help="skip the late-regular-season test (faster)")
     for name in ("build", "all"):
         sp = sub.add_parser(name, help="fit + simulate + write dashboard" if name == "build" else "pull + build")
         sp.add_argument("--n", type=int, default=None, help="number of simulated series")
@@ -46,6 +51,9 @@ def main(argv: list[str] | None = None) -> None:
         res = backtest(p, pa, cfg.model)
         OUTPUT.mkdir(parents=True, exist_ok=True)
         (OUTPUT / "backtest.json").write_text(json.dumps(res, indent=2))
+    elif a.cmd == "backtest-games":
+        from .backtest_games import run as run_games
+        run_games(cfg, a.post_sims, a.reg_sims, not a.no_regular)
     elif a.cmd in ("build", "all"):
         if a.cmd == "all":
             from .data import pull_all
