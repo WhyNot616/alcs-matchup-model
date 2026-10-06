@@ -243,7 +243,7 @@ class World:
         ctx, plan = self.context(spec, boost, rates, cache)
         seeds = self.fatigue([spec.home, spec.away], spec.day)
         rng = np.random.default_rng(seed)
-        hw, hr_sum, ar_sum, tie = 0, 0, 0, 0
+        hw, hr_sum, ar_sum = 0, 0, 0
         for _ in range(n):
             fat = Fatigue()
             for pid, d_, k in seeds:

@@ -371,7 +371,7 @@ def calibrate_scoring(ctx: SimContext, plans: list[GamePlan], target_rpg: float,
     """
     from .pa_model import Rates
 
-    orig_rates, orig_cache, orig_tilt = ctx.rates, ctx.cache, ctx.scoring_tilt
+    orig_rates = ctx.rates
     ctx.rates = Rates(orig_rates.league, {}, {}, {}, {})
 
     def rpg(tilt: float) -> float:

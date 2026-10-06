@@ -232,6 +232,6 @@ def backtest(pitches: pd.DataFrame, pa: pd.DataFrame, cfg_model: dict, verbose: 
         print(f"  corr(edge, wOBA residual) = {corr:+.4f}")
         import os
         if os.environ.get("GITHUB_ACTIONS"):
-            print(f"::notice title=backtest::" + "; ".join(f"{k} {v:.5f}" for k, v in ll.items())
+            print("::notice title=backtest::" + "; ".join(f"{k} {v:.5f}" for k, v in ll.items())
                   + f"; lambda {lam_best}; mix gain {res['mix_gain_pct']:+.3f}%; corr {corr:+.4f}", flush=True)
     return res
