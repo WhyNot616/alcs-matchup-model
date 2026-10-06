@@ -344,6 +344,22 @@ def score_games(games: list[GameSpec], seed: int = 0, n_boot: int = 2000) -> dic
         fav = np.where(preds["model"] >= 0.5, preds["model"], 1 - preds["model"])
         fav_won = np.where(preds["model"] >= 0.5, y, 1 - y)
         out["favorites"] = {"mean_fav_prob": float(fav.mean()), "fav_win_rate": float(fav_won.mean())}
+        # per-team bias: does the model systematically over- or under-rate a team?
+        rows = []
+        for i, g in enumerate(games):
+            for team, is_home in ((g.home, True), (g.away, False)):
+                pm = preds["model"][i] if is_home else 1 - preds["model"][i]
+                pp = preds.get("log5_pythag", preds["model"])[i]
+                pp = pp if is_home else 1 - pp
+                rows.append((team, pm, pp, y[i] if is_home else 1 - y[i]))
+        tb = pd.DataFrame(rows, columns=["team", "model", "pythag", "won"]).groupby("team").agg(
+            g=("won", "size"), exp_model=("model", "sum"), exp_pythag=("pythag", "sum"), won=("won", "sum"))
+        tb["resid_model"] = tb["won"] - tb["exp_model"]
+        tb["resid_pythag"] = tb["won"] - tb["exp_pythag"]
+        # a fair-coin spread for comparison: sd of wins given the model's own probabilities
+        var = pd.DataFrame(rows, columns=["team", "model", "pythag", "won"]).assign(v=lambda x: x["model"] * (1 - x["model"]))
+        tb["sd_model"] = np.sqrt(var.groupby("team")["v"].sum())
+        out["team_bias"] = tb.reset_index().round(3).to_dict(orient="records")
     return out
 
 
@@ -419,7 +435,11 @@ def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFra
                 _note(f"regular season: {i + 1}/{len(reg)} games simulated", t0)
         sc = score_games(reg, seed)
         sc["pa"] = pa_check(W2, pa[pa_gt.eq("R") & (pa["game_date"] >= split)])
-        result["regular"] = {"split": str(split.date()), "n_games": len(reg), **sc}
+        result["regular"] = {"split": str(split.date()), "n_games": len(reg), **sc,
+                             "games": [[str(g.day), g.away, g.home, round(g.pred["p_home"], 4),
+                                        round(g.pred["baselines"].get("log5_pythag", float("nan")), 4),
+                                        g.away_runs, g.home_runs] for g in reg],
+                             "games_fields": ["date", "away", "home", "p_home", "pythag", "away_runs", "home_runs"]}
         _note(f"regular season: {len(reg)} games, model Brier {sc['metrics']['model']['brier']:.4f}, "
               f"best baseline " + ", ".join(f"{k} {v['brier']:.4f}" for k, v in sc["metrics"].items() if k != "model"), t0)
     return result
