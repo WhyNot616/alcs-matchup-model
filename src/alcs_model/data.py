@@ -330,3 +330,118 @@ def pull_postseason_games(cfg: Config, verbose: bool = True) -> Path | None:
 def load_postseason_games(cfg: Config) -> list[dict]:
     path = DATA_RAW / f"postseason_games_{cfg.season}.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+
+
+# ---------------------------------------------------------------- past seasons' scores
+def pull_season_scores(season: int, refresh: bool = False, verbose: bool = True) -> pd.DataFrame:
+    """Final scores of every regular-season and postseason game in a season (MLB Stats API)."""
+    ensure_dirs()
+    path = DATA_RAW / f"scores_{season}.csv"
+    if path.exists() and not refresh and season < date.today().year:
+        return pd.read_csv(path)
+    rows = []
+    for gt in ("R", "F,D,L,W"):
+        js = _get(f"{STATSAPI}/schedule", {"sportId": 1, "season": season, "gameType": gt}).json()
+        for d in js.get("dates", []):
+            for g in d["games"]:
+                if g.get("status", {}).get("abstractGameState") != "Final":
+                    continue
+                h, a = g["teams"]["home"], g["teams"]["away"]
+                if h.get("score") is None or a.get("score") is None:
+                    continue
+                rows.append({"season": season, "game_pk": g["gamePk"], "date": d["date"], "game_type": g["gameType"],
+                             "home": ID2ABBR.get(int(h["team"]["id"])), "away": ID2ABBR.get(int(a["team"]["id"])),
+                             "home_runs": int(h["score"]), "away_runs": int(a["score"])})
+    df = pd.DataFrame(rows).drop_duplicates("game_pk")
+    df.to_csv(path, index=False)
+    if verbose:
+        n_post = int((df["game_type"] != "R").sum()) if len(df) else 0
+        print(f"  {season}: {len(df) - n_post} regular-season and {n_post} postseason games")
+    return df
+
+
+# ---------------------------------------------------------------- betting lines (ESPN / DraftKings)
+ESPN = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb"
+ESPN_ABBR = {"ARI": "AZ", "CHW": "CWS", "WSN": "WSH", "OAK": "ATH", "KCR": "KC", "SDP": "SD", "SFG": "SF", "TBR": "TB"}
+
+
+def _ml_prob(ml) -> float | None:
+    try:
+        v = float(str(ml).replace("+", ""))
+    except (TypeError, ValueError):
+        return None
+    if v == 0:
+        return None
+    return -v / (-v + 100) if v < 0 else 100 / (v + 100)
+
+
+def _parse_pick(pick: list) -> dict:
+    """Closing (else opening) moneyline and total from ESPN's pickcenter block."""
+    if not pick:
+        return {}
+    p = pick[0]
+    out = {"provider": (p.get("provider") or {}).get("name")}
+    ml = p.get("moneyline") or {}
+    for when in ("close", "open"):
+        h = ((ml.get("home") or {}).get(when) or {}).get("odds")
+        a = ((ml.get("away") or {}).get(when) or {}).get("odds")
+        ph, pa_ = _ml_prob(h), _ml_prob(a)
+        if ph and pa_:
+            out[f"p_home_{when}"] = ph / (ph + pa_)        # proportional vig removal
+            out[f"ml_{when}"] = [h, a]
+    if "p_home_close" not in out:
+        h = (p.get("homeTeamOdds") or {}).get("moneyLine")
+        a = (p.get("awayTeamOdds") or {}).get("moneyLine")
+        ph, pa_ = _ml_prob(h), _ml_prob(a)
+        if ph and pa_:
+            out["p_home_close"] = ph / (ph + pa_)
+    tot = ((p.get("total") or {}).get("over") or {})
+    for when in ("close", "open"):
+        line = (tot.get(when) or {}).get("line")
+        if line:
+            try:
+                out[f"total_{when}"] = float(str(line).lstrip("ou"))
+            except ValueError:
+                pass
+    if "total_close" not in out and p.get("overUnder") is not None:
+        out["total_close"] = float(p["overUnder"])
+    return out
+
+
+def pull_espn_odds(dates, season: int, verbose: bool = True) -> dict:
+    """Pregame lines for every game on the given dates. Cached by ESPN event id in data/raw."""
+    ensure_dirs()
+    path = DATA_RAW / f"espn_odds_{season}.json"
+    cache = json.loads(path.read_text()) if path.exists() else {}
+    if os.environ.get("ALCS_OFFLINE"):
+        return cache
+    new = 0
+    for d in sorted({pd.Timestamp(x).strftime("%Y%m%d") for x in dates}):
+        try:
+            sb = _get(f"{ESPN}/scoreboard", {"dates": d, "limit": 50}).json()
+        except Exception as e:
+            print(f"  warning: ESPN scoreboard {d} failed ({e})")
+            continue
+        for ev in sb.get("events", []):
+            eid = str(ev["id"])
+            comp = ev["competitions"][0]
+            if (comp.get("status", {}).get("type", {}).get("name") != "STATUS_FINAL") or (eid in cache and cache[eid].get("lines")):
+                continue
+            teams = {c["homeAway"]: c["team"]["abbreviation"] for c in comp["competitors"]}
+            rec = {"date": f"{d[:4]}-{d[4:6]}-{d[6:]}", "start": ev.get("date"),
+                   "home": ESPN_ABBR.get(teams.get("home"), teams.get("home")),
+                   "away": ESPN_ABBR.get(teams.get("away"), teams.get("away")),
+                   "scores": {c["homeAway"]: c.get("score") for c in comp["competitors"]}}
+            try:
+                s = _get(f"{ESPN}/summary", {"event": eid}).json()
+                rec["lines"] = _parse_pick(s.get("pickcenter") or [])
+            except Exception as e:
+                rec["lines"] = {}
+                print(f"  warning: ESPN summary {eid} failed ({e})")
+            cache[eid] = rec
+            new += 1
+        path.write_text(json.dumps(cache))
+    if verbose:
+        have = sum(1 for v in cache.values() if v.get("lines", {}).get("p_home_close"))
+        print(f"  ESPN odds: {new} new events, {have} of {len(cache)} cached events have a moneyline")
+    return cache

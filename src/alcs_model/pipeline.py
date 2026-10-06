@@ -230,7 +230,10 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
                                                                               a=("post_away_score", "max"))
     league_rpg = float((reg_games["h"].mean() + reg_games["a"].mean()) / 2)
     park_runs = agg.park_run_index(cfg, lb["park_factors"], [pl.venue for pl in plans])
-    scoring = calibrate_scoring(ctx, plans, league_rpg * park_runs, n_games=2000, seed=seed)
+    from .postseason_env import load_factor
+    post_factor = load_factor(cfg)
+    scoring = calibrate_scoring(ctx, plans, league_rpg * park_runs * post_factor, n_games=2000, seed=seed)
+    scoring["post_factor"] = post_factor
     _log(f"scoring calibration: tilt {scoring['tilt']:+.3f}, league-average teams "
          f"{scoring['rpg_at_0']:.2f} -> {scoring['rpg_after']:.2f} R/G (target {scoring['target_rpg']:.2f})", t0)
     sim = sim_series(ctx, plans, n_series, seed)
@@ -320,6 +323,9 @@ def render(data: dict | None = None) -> None:
     gb = OUTPUT / "game_backtest.json"
     if gb.exists():
         data["game_backtest"] = json.loads(gb.read_text())
+    pe = OUTPUT / "postseason_env.json"
+    if pe.exists():
+        data["postseason_env"] = json.loads(pe.read_text())
     tmpl = DASHBOARD_TEMPLATE.read_text(encoding="utf-8")
     blob = json.dumps(data, default=_json_default, ensure_ascii=False, separators=(",", ":"))
     blob = blob.replace("</", "<\\/")

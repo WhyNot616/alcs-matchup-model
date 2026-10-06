@@ -254,11 +254,13 @@ class World:
             ar_sum += ar
         return {"p_home": hw / n, "exp_home": hr_sum / n, "exp_away": ar_sum / n}
 
-    def calibrate_scoring(self, specs: list[GameSpec], n_per: int = 12, seed: int = 0, verbose: bool = True) -> dict:
-        """Pick the global scoring tilt so league-average players score like the training league did."""
+    def calibrate_scoring(self, specs: list[GameSpec], n_per: int = 12, seed: int = 0, verbose: bool = True,
+                          factor: float = 1.0) -> dict:
+        """Pick the global scoring tilt so league-average players score like the training league did,
+        times `factor` (the postseason run environment, 1.0 for regular-season games)."""
         lg_rates = Rates(self.rates.league, {}, {}, {}, {})
         sample = specs if len(specs) <= 150 else [specs[i] for i in np.linspace(0, len(specs) - 1, 150).astype(int)]
-        target = self.league_rpg * float(np.mean([self.runs_idx.get(self.venue(s), 1.0) for s in sample]))
+        target = factor * self.league_rpg * float(np.mean([self.runs_idx.get(self.venue(s), 1.0) for s in sample]))
 
         def rpg(tilt):
             self.scoring_tilt = tilt
@@ -275,7 +277,7 @@ class World:
         self.cache = {}
         if verbose:
             print(f"  scoring tilt {tilt:+.3f} (league-average sim {r0:.2f} R/G, target {target:.2f})", flush=True)
-        return {"tilt": tilt, "rpg_at_0": r0, "target": target}
+        return {"tilt": tilt, "rpg_at_0": r0, "target": target, "factor": factor}
 
     # -- baselines
     def baselines(self, spec: GameSpec) -> dict:
@@ -307,25 +309,32 @@ def score_games(games: list[GameSpec], seed: int = 0, n_boot: int = 2000) -> dic
     if not games:
         return {}
     y = np.array([1.0 if g.home_runs > g.away_runs else 0.0 for g in games])
-    names = ["model"] + [k for k in games[0].pred["baselines"]]
+    order = ["coin", "home", "log5_wpct", "log5_pythag", "market", "market_open"]
+    keys = {k for g in games for k in g.pred["baselines"]}
+    names = ["model"] + [k for k in order if k in keys] + sorted(keys - set(order))
     preds = {"model": np.array([g.pred["p_home"] for g in games])}
     for k in names[1:]:
         preds[k] = np.array([g.pred["baselines"].get(k, np.nan) for g in games])
     out = {"metrics": {}, "vs_model": {}}
     for k, v in preds.items():
         ok = ~np.isnan(v)
+        if not ok.any():
+            continue
         out["metrics"][k] = _metrics(v[ok], y[ok])
+        if not ok.all():  # model scored on the same games, for a fair comparison
+            out["metrics"][k]["model_same_games"] = _metrics(preds["model"][ok], y[ok])
     rng = np.random.default_rng(seed)
-    idx = rng.integers(0, len(y), size=(n_boot, len(y)))
     bm = (preds["model"] - y) ** 2
     for k in names[1:]:
         v = preds[k]
-        if np.isnan(v).any():
+        ok = ~np.isnan(v)
+        if ok.sum() < 5:
             continue
-        diff = bm - (v - y) ** 2                     # negative = model better
+        diff = bm[ok] - (v[ok] - y[ok]) ** 2          # negative = model better
+        idx = rng.integers(0, len(diff), size=(n_boot, len(diff)))
         boots = diff[idx].mean(1)
         out["vs_model"][k] = {"brier_diff": float(diff.mean()), "lo": float(np.percentile(boots, 2.5)),
-                              "hi": float(np.percentile(boots, 97.5)),
+                              "hi": float(np.percentile(boots, 97.5)), "n": int(ok.sum()),
                               "p_model_better": float((boots < 0).mean())}
     exp_tot = np.array([g.pred["exp_home"] + g.pred["exp_away"] for g in games])
     act_tot = np.array([g.home_runs + g.away_runs for g in games], dtype=float)
@@ -381,7 +390,10 @@ def pa_check(world: World, pa_test: pd.DataFrame) -> dict:
 # ---------------------------------------------------------------- driver
 def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFrame | None = None,
                   post_rows: list[dict] | None = None, post_sims: int = 4000, reg_sims: int = 300,
-                  include_regular: bool = True, seed: int = 7, verbose: bool = True) -> dict:
+                  include_regular: bool = True, seed: int = 7, verbose: bool = True,
+                  odds: dict | None = None, post_factor: float = 1.0) -> dict:
+    from .market import match_odds, model_vs_market, totals_check
+
     bt_path = OUTPUT / "backtest.json"
     bt = json.loads(bt_path.read_text()) if bt_path.exists() else None
     tuned = bt.get("tuned") if bt else None
@@ -406,15 +418,39 @@ def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFra
             specs[s.game_pk] = s
     post = sorted(specs.values(), key=lambda s: (s.day, s.game_pk))
     if post:
-        result["postseason_calibration"] = W.calibrate_scoring(post, seed=seed, verbose=verbose)
+        # first without the postseason run environment (regular-season scoring level) ...
+        result["postseason_calibration_no_env"] = W.calibrate_scoring(post, seed=seed, verbose=verbose)
         for i, s in enumerate(post):
             s.pred = W.simulate(s, post_sims, seed + i, boost=boost)
             s.pred["baselines"] = W.baselines(s)
+        if odds:
+            match_odds(post, odds)
+        no_env = score_games(post, seed)
+        no_env["totals_market"] = totals_check(post)
+        no_env_rows = {s.game_pk: (s.pred["p_home"], s.pred["exp_home"], s.pred["exp_away"]) for s in post}
+        # ... then with it, fit on earlier postseasons
+        result["postseason_calibration"] = W.calibrate_scoring(post, seed=seed, verbose=verbose, factor=post_factor)
+        for i, s in enumerate(post):
+            base = s.pred["baselines"]
+            extra = {k: s.pred[k] for k in ("market_total", "market_ml") if k in s.pred}
+            s.pred = {**W.simulate(s, post_sims, seed + i, boost=boost), "baselines": base, **extra}
             if verbose:
                 print(f"  {s.day} {s.label:<28} {s.away}@{s.home}: P(home) {s.pred['p_home']:.3f}  "
-                      f"final {s.away_runs}-{s.home_runs}", flush=True)
+                      f"market {base.get('market', float('nan')):.3f}  final {s.away_runs}-{s.home_runs}", flush=True)
         result["postseason"] = {"games": [_game_row(s, W) for s in post], **score_games(post, seed)}
+        for g in result["postseason"]["games"]:
+            r = no_env_rows[g["game_pk"]]
+            g["no_env"] = {"p_home": round(r[0], 4), "exp_home": round(r[1], 2), "exp_away": round(r[2], 2)}
+        result["postseason"]["no_env"] = no_env
+        result["postseason"]["post_factor"] = post_factor
+        result["postseason"]["totals_market"] = totals_check(post)
+        result["postseason"]["market_test"] = model_vs_market(post)
         result["postseason"]["pa"] = pa_check(W, pa[~pa_gt.eq("R")])
+        m, ne = result["postseason"]["metrics"], no_env["metrics"]
+        _note(f"postseason env factor {post_factor:.3f}: Brier {ne['model']['brier']:.4f} -> {m['model']['brier']:.4f}; "
+              f"runs/game model {no_env['runs']['exp_total_mean']:.2f} -> {result['postseason']['runs']['exp_total_mean']:.2f}, "
+              f"actual {result['postseason']['runs']['act_total_mean']:.2f}"
+              + (f"; market Brier {m['market']['brier']:.4f} on {m['market']['n']} games" if "market" in m else ""), t0)
         _note(f"postseason: {len(post)} games, model Brier "
               f"{result['postseason']['metrics']['model']['brier']:.4f}", t0)
     else:
@@ -433,13 +469,23 @@ def game_backtest(cfg: Config, p: pd.DataFrame, pa: pd.DataFrame, pf: pd.DataFra
             s.pred["baselines"] = W2.baselines(s)
             if verbose and (i % 100 == 0 or i == len(reg) - 1):
                 _note(f"regular season: {i + 1}/{len(reg)} games simulated", t0)
+        if odds:
+            nm = match_odds(reg, odds)
+            _note(f"matched market lines to {nm} of {len(reg)} late-season games", t0)
         sc = score_games(reg, seed)
+        sc["market_test"] = model_vs_market(reg)
+        sc["totals_market"] = totals_check(reg)
         sc["pa"] = pa_check(W2, pa[pa_gt.eq("R") & (pa["game_date"] >= split)])
         result["regular"] = {"split": str(split.date()), "n_games": len(reg), **sc,
                              "games": [[str(g.day), g.away, g.home, round(g.pred["p_home"], 4),
                                         round(g.pred["baselines"].get("log5_pythag", float("nan")), 4),
-                                        g.away_runs, g.home_runs] for g in reg],
-                             "games_fields": ["date", "away", "home", "p_home", "pythag", "away_runs", "home_runs"]}
+                                        g.pred["baselines"].get("market"), g.away_runs, g.home_runs] for g in reg],
+                             "games_fields": ["date", "away", "home", "p_home", "pythag", "market", "away_runs", "home_runs"]}
+        mt = sc.get("market_test")
+        if mt:
+            _note(f"vs market ({mt['n']} games): model {mt['brier_model']:.4f}, market {mt['brier_market']:.4f}, "
+                  f"blend {mt['brier_blend']:.4f}; coef on model-minus-market {mt['coef']['model_minus_market']:.3f} "
+                  f"(se {mt['se']['model_minus_market']:.3f})", t0)
         _note(f"regular season: {len(reg)} games, model Brier {sc['metrics']['model']['brier']:.4f}, "
               f"best baseline " + ", ".join(f"{k} {v['brier']:.4f}" for k, v in sc["metrics"].items() if k != "model"), t0)
     return result
@@ -450,7 +496,8 @@ def _game_row(s: GameSpec, W: World) -> dict:
             "starters": {s.home: s.starter[s.home], s.away: s.starter[s.away]},
             "p_home": round(s.pred["p_home"], 4), "exp_home": round(s.pred["exp_home"], 2),
             "exp_away": round(s.pred["exp_away"], 2), "home_runs": s.home_runs, "away_runs": s.away_runs,
-            "baselines": {k: round(v, 4) for k, v in s.pred["baselines"].items()}, "venue": W.venue(s)}
+            "baselines": {k: round(v, 4) for k, v in s.pred["baselines"].items()}, "venue": W.venue(s),
+            "market_total": s.pred.get("market_total"), "market_ml": s.pred.get("market_ml")}
 
 
 def _note(msg: str, t0: float) -> None:
@@ -471,8 +518,29 @@ def run(cfg: Config, post_sims: int = 4000, reg_sims: int = 300, include_regular
         pull_postseason_games(cfg)
     except Exception as e:  # boxscores are a supplement; Statcast alone still works
         print(f"  warning: postseason boxscores failed ({e})")
-    res = game_backtest(cfg, p, pa, load_leaderboard(cfg, "park_factors"), load_postseason_games(cfg),
-                        post_sims, reg_sims, include_regular, seed)
+    from .data import pull_espn_odds
+    from .postseason_env import load_factor
+    from .postseason_env import run as run_env
+
+    if not (OUTPUT / "postseason_env.json").exists():
+        try:
+            run_env(cfg)
+        except Exception as e:
+            print(f"  warning: postseason environment fit failed ({e}); using factor 1.0")
+    factor = load_factor(cfg)
+    post_rows = load_postseason_games(cfg)
+    gt = p["game_type"].astype(str)
+    split = pd.Timestamp(cfg.model["backtest_split"])
+    dates = set(p.loc[~gt.eq("R"), "game_date"]) | {pd.Timestamp(r["date"]) for r in post_rows}
+    if include_regular:
+        dates |= set(p.loc[gt.eq("R") & (p["game_date"] >= split), "game_date"])
+    try:
+        odds = pull_espn_odds(dates, cfg.season)
+    except Exception as e:
+        print(f"  warning: market lines failed ({e})")
+        odds = {}
+    res = game_backtest(cfg, p, pa, load_leaderboard(cfg, "park_factors"), post_rows,
+                        post_sims, reg_sims, include_regular, seed, odds=odds, post_factor=factor)
     ids = {pid for g in res["postseason"]["games"] for pid in g["starters"].values()}
     names = lookup_names(ids) if ids else {}
     for g in res["postseason"]["games"]:

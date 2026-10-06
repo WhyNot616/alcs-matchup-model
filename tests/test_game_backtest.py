@@ -25,7 +25,16 @@ def test_game_backtest_runs(raw, cfg, tmp_path, monkeypatch):
     p = prepare_pitches(_with_postseason(raw))
     pa = plate_appearances(p)
     cfg.raw["model"]["backtest_split"] = "2026-08-20"
-    res = game_backtest(cfg, p, pa, post_sims=60, reg_sims=20, verbose=False)
+    # fake market lines: a noisy copy of the truth, keyed like ESPN's cache
+    gs = p.groupby("game_pk").agg(d=("game_date", "first"), h=("home_team", "first"), a=("away_team", "first"),
+                                  hr=("post_home_score", "max"), ar=("post_away_score", "max"))
+    rng = np.random.default_rng(3)
+    odds = {str(k): {"date": str(r.d.date()), "home": r.h, "away": r.a, "start": str(k),
+                     "scores": {"home": int(r.hr), "away": int(r.ar)},
+                     "lines": {"p_home_close": float(np.clip(0.5 + 0.1 * np.sign(r.hr - r.ar) + rng.normal(0, .1), .2, .8)),
+                               "total_close": 8.5}}
+            for k, r in gs.iterrows()}
+    res = game_backtest(cfg, p, pa, post_sims=60, reg_sims=20, verbose=False, odds=odds, post_factor=0.85)
     games = res["postseason"]["games"]
     assert len(games) >= 6
     assert all(0 < g["p_home"] < 1 for g in games)
@@ -36,3 +45,6 @@ def test_game_backtest_runs(raw, cfg, tmp_path, monkeypatch):
     # synthetic teams have real talent gaps, so the model should beat a coin flip on many games
     assert reg["metrics"]["model"]["brier"] < reg["metrics"]["coin"]["brier"]
     assert np.isfinite(reg["runs"]["rmse_total"])
+    assert "market" in reg["metrics"] and reg["market_test"]["n"] > 30
+    assert res["postseason"]["post_factor"] == 0.85 and "no_env" in res["postseason"]
+    assert res["postseason_calibration"]["target"] < res["postseason_calibration_no_env"]["target"]

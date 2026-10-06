@@ -71,6 +71,8 @@ model:
     pa: { K: 60, BB: 120, "1B": 300, "2B": 600, "3B": 600, HR: 170, OUT: 300 }
   home_pa_tilt: 0.05            # home batters get exp(0.05) odds on good PA outcomes; with identical teams this gives the home side ~53.5% (MLB norm)
   postseason_leverage_boost: 1.6  # how much more often top relievers get high-leverage innings in October
+  postseason_run_factor: auto     # "auto" = fit on past postseasons (alcs history); or a number, 1.0 = no adjustment
+  postseason_env_seasons: [2021, 2022, 2023, 2024, 2025]
 
 sim:
   n_series: 5000
