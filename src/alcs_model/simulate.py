@@ -321,3 +321,39 @@ def sim_series(ctx: SimContext, plans: list[GamePlan], n: int, seed: int,
                           for i in range(len(plans))],
         "runs_per_game": {t: float(np.mean(v)) for t, v in runs.items()},
     }
+
+
+def calibrate(ctx: SimContext, plans: list[GamePlan], n_games: int = 1500, seed: int = 0) -> dict:
+    """Check the simulator's scoring level against reality.
+
+    Runs three variants on the real series schedule (parks, home tilt and bullpen usage included):
+      league : every batter and pitcher at league-average rates
+      offense: each team's real hitters vs league-average pitching
+      defense: each team's real pitchers vs league-average hitting
+    Compare the results with actual runs per game to see whether the simulator scores too much or too
+    little, and whether each team's offense and run prevention come through at the right size.
+    """
+    from .pa_model import Rates  # local import to avoid a cycle at module load
+
+    orig_rates, orig_cache = ctx.rates, ctx.cache
+    r = orig_rates
+    variants = {
+        "league": Rates(r.league, {}, {}, {}, {}),
+        "offense": Rates(r.league, r.batter, {}, r.batter_n, {}),
+        "defense": Rates(r.league, {}, r.pitcher, {}, r.pitcher_n),
+    }
+    out = {}
+    teams = list(ctx.teams)
+    for name, rates in variants.items():
+        ctx.rates, ctx.cache = rates, {}
+        rng = np.random.default_rng(seed)
+        runs = {t: [] for t in teams}
+        for i in range(n_games):
+            plan = plans[i % len(plans)]
+            ar, hr = sim_game(ctx, plan, Fatigue(), rng)
+            away = next(t for t in teams if t != plan.home)
+            runs[away].append(ar)
+            runs[plan.home].append(hr)
+        out[name] = {t: float(np.mean(v)) for t, v in runs.items()}
+    ctx.rates, ctx.cache = orig_rates, orig_cache
+    return out

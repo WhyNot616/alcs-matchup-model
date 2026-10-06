@@ -76,3 +76,4 @@ sim:
   n_series: 5000
   bootstrap: 20                 # resample the data this many times to get an uncertainty range
   seed: 2026
+  calibration_games: 1500       # games per calibration variant (league-average check of the simulator)

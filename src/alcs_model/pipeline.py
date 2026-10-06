@@ -18,7 +18,7 @@ from .features import (OUTCOMES, active_players, leverage_table, plate_appearanc
                        prepare_pitches)
 from .matchups import build_profiles, matchup_detail, pair_edges
 from .pa_model import backtest, batter_side, build_rates, expected_woba, matchup_probs
-from .simulate import GamePlan, SimContext, TeamSetup, sim_series
+from .simulate import GamePlan, SimContext, TeamSetup, calibrate, sim_series
 
 
 @dataclass
@@ -238,6 +238,20 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
             r = sim_series(cb, plb, per, seed + 100 + b)
             boots.append(r["p_win"])
             _log(f"bootstrap {b + 1}/{n_boot}: " + ", ".join(f"{k} {v:.1%}" for k, v in r["p_win"].items()), t0)
+    # ---- calibration: does the simulator score at the right level?
+    cal = calibrate(ctx, plans, n_games=int(cfg.sim.get("calibration_games", 1500)), seed=seed)
+    reg_games = p[p["game_type"].astype(str).eq("R")].groupby("game_pk").agg(h=("post_home_score", "max"),
+                                                                              a=("post_away_score", "max"))
+    actual = {"league_rpg": float((reg_games["h"].mean() + reg_games["a"].mean()) / 2)}
+    for t in cfg.teams:
+        G = agg.game_results(p[p["game_type"].astype(str).eq("R")], t)
+        actual[t] = {"rpg": float(G["rf"].mean()), "rapg": float(G["ra"].mean())}
+    calib = {"sim": cal, "actual": actual}
+    _log("calibration: sim league R/G " + ", ".join(f"{k} {v:.2f}" for k, v in cal["league"].items())
+         + f" vs actual {actual['league_rpg']:.2f}; offense " + ", ".join(f"{k} {v:.2f}" for k, v in cal["offense"].items())
+         + " vs actual " + ", ".join(f"{t} {actual[t]['rpg']:.2f}" for t in cfg.teams)
+         + "; runs allowed " + ", ".join(f"{cfg.opponent(k)} {v:.2f}" for k, v in cal["defense"].items())
+         + " vs actual " + ", ".join(f"{t} {actual[t]['rapg']:.2f}" for t in cfg.teams), t0)
     hs = cfg["higher_seed"]
     band = None
     if boots:
@@ -262,7 +276,7 @@ def run(cfg: Config, n_series: int | None = None, n_boot: int | None = None, ski
         "conditions": agg.conditions(tp, sched, cfg),
         "defense": agg.defense(cfg, lb),
         "park": agg.park(cfg, lb["park_factors"]),
-        "matrix": matrix, "bullpen": bull, "sim": sim, "backtest": bt,
+        "matrix": matrix, "bullpen": bull, "sim": sim, "backtest": bt, "calibration": calib,
         "rosters": {t: {k: v for k, v in ros[t].items()} for t in cfg.teams},
         "config": {"schedule": cfg["schedule"], "rotation": cfg["rotation"], "lineups": cfg["lineups"]},
     }
