@@ -18,6 +18,7 @@ rotations, lineups, bullpen overrides and model parameters.
 - Quick build while iterating: `python -m alcs_model build --n 300 --bootstrap 0 --skip-backtest`
 - Re-render the HTML only: `python -m alcs_model render`
 - Game-level backtest: `python -m alcs_model backtest-games [--no-regular] [--post-sims 4000] [--reg-sims 300]`
+- Postseason run environment: `python -m alcs_model history` (writes `output/postseason_env.json`)
 
 ## Layout
 
@@ -30,6 +31,8 @@ rotations, lineups, bullpen overrides and model parameters.
 - `aggregates.py`: raw descriptive tables for the dashboard (field order in `FIELDS`)
 - `backtest_games.py`: `World` (model fit on a training window), `game_backtest`, `score_games`; writes
   `output/game_backtest.json`, which `render()` merges into the dashboard
+- `postseason_env.py`: actual vs expected scoring in past postseasons; `load_factor` feeds the simulator
+- `market.py`: matches ESPN/DraftKings lines to games, `model_vs_market` regression, `totals_check`
 - `pipeline.py`: `run()` orchestrates everything and writes `output/dashboard_data.json` + `docs/index.html`
 - `dashboard/template.html`: the dashboard; `__DATA__` is replaced with the JSON at render time
 
@@ -54,3 +57,5 @@ rotations, lineups, bullpen overrides and model parameters.
   baserunning rules in `_advance` change.
 - The game backtest must stay leak-free: anything about a game (lineups, starters, bullpen, fatigue) may
   only use data dated before that game, and models are fit on the training window only.
+- Market lines are a benchmark only. Never feed them into the model's own predictions, or the
+  comparison stops meaning anything.

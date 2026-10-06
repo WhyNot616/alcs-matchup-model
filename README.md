@@ -41,7 +41,9 @@ alcs pull --scope teams   # faster alternative: only games involving the two tea
 alcs build                # fit, backtest, simulate 5,000 series + 20 bootstrap reruns, write the dashboard
 alcs build --n 500 --bootstrap 0 --skip-backtest   # quick iteration while editing
 alcs backtest             # plate-appearance model check
-alcs backtest-games       # predict every 2026 playoff game and every game after Aug 1 pregame, then score them
+alcs history              # fit the October run environment on the 2021-2025 postseasons
+alcs backtest-games       # predict every 2026 playoff game and every game after Aug 1 pregame, score them,
+                          # and compare with DraftKings closing lines (via ESPN)
 alcs render               # rebuild docs/index.html from the last saved output
 alcs all                  # pull new data, then build
 ```
