@@ -99,7 +99,7 @@ tr.out td{color:var(--ink-3)}
 .sr .w{font-family:var(--f-data);font-weight:700;text-align:center}
 .sr.lost{color:var(--ink-3)}.sr.won .nm{font-weight:700}
 .sc .note{font-size:.8rem;color:var(--ink-2)}
-.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;background:var(--surface-2);flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:18px;padding:2px;background:var(--surface-2);flex-wrap:wrap}
 .seg button{font:inherit;font-family:var(--f-data);font-size:.76rem;border:0;background:transparent;color:var(--ink-2);padding:6px 12px;border-radius:999px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -107,6 +107,7 @@ tr.out td{color:var(--ink-3)}
 #tip{position:fixed;pointer-events:none;z-index:50;background:var(--ink);color:var(--bg);font-family:var(--f-data);font-size:.74rem;padding:6px 8px;border-radius:4px;max-width:270px;opacity:0;transition:opacity .08s;line-height:1.35}
 footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-3);font-size:.85rem;display:grid;gap:6px}
 @media (max-width:640px){.hb{grid-template-columns:110px minmax(0,1fr) 50px}}
+@media (max-width:760px){.rounds{grid-template-columns:minmax(0,1fr)!important;max-width:none!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -193,7 +194,7 @@ const TI=B.team_info||{};
 const TEAMS=B.teams||{};
 const NAMES=B.names||{};
 const tn=t=>(TI[t]&&TI[t].name)||t;
-const nick=t=>{const n=tn(t);const parts=n.split(' ');return ['Sox','Jays'].includes(parts[parts.length-1])&&parts.length>2?parts.slice(-2).join(' '):parts[parts.length-1]};
+const nick=t=>{const n=tn(t);const parts=n.split(' ');if(parts.length<=2&&['Sox','Jays'].includes(parts[parts.length-1]))return n;return ['Sox','Jays'].includes(parts[parts.length-1])?parts.slice(-2).join(' '):parts[parts.length-1]};
 const pname=id=>{const n=NAMES[String(id)];if(!n)return id&&id>0?'#'+id:'TBD';const [last,first]=n.split(', ');return first?first[0]+'. '+last:n};
 const seed=t=>TI[t]&&TI[t].seed;
 const RN={WC:'Wild Card',DS:'Division Series',LCS:'Championship Series',WS:'World Series'};
