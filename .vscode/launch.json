@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "alcs build (quick)", "type": "debugpy", "request": "launch", "module": "alcs_model",
+      "args": ["build", "--n", "500", "--bootstrap", "0", "--skip-backtest"], "console": "integratedTerminal" },
+    { "name": "alcs pull (teams only)", "type": "debugpy", "request": "launch", "module": "alcs_model",
+      "args": ["pull", "--scope", "teams"], "console": "integratedTerminal" }
+  ]
+}

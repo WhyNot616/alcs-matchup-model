@@ -1,0 +1,78 @@
+# Series configuration. Edit this file when rosters, rotations or the schedule change,
+# then rerun `alcs all`. Player IDs are MLBAM IDs (the number in a Baseball Savant player URL).
+
+season: 2026
+series_name: "2026 ALCS"
+
+teams:
+  CWS:
+    name: White Sox
+    venue: Rate Field
+    roof: outdoor
+  TB:
+    name: Rays
+    venue: Tropicana Field
+    roof: dome
+
+higher_seed: TB
+
+# 2-3-2 format. `home` is the home team for each game. Dates drive bullpen rest in the simulator.
+schedule:
+  - { game: 1, date: "2026-10-12", home: TB }
+  - { game: 2, date: "2026-10-13", home: TB }
+  - { game: 3, date: "2026-10-15", home: CWS }
+  - { game: 4, date: "2026-10-16", home: CWS }
+  - { game: 5, date: "2026-10-17", home: CWS }
+  - { game: 6, date: "2026-10-19", home: TB }
+  - { game: 7, date: "2026-10-20", home: TB }
+
+# Starters by game. `opener` + `bulk` models a planned opener; max_bf caps the opener.
+rotation:
+  TB:
+    - { starter: 656876, name: "Drew Rasmussen" }
+    - { starter: 642547, name: "Freddy Peralta" }
+    - { starter: 607259, name: "Nick Martinez" }
+    - { starter: 643377, name: "Griffin Jax" }
+    - { starter: 656876, name: "Drew Rasmussen" }
+    - { starter: 642547, name: "Freddy Peralta" }
+    - { starter: 607259, name: "Nick Martinez" }
+  CWS:
+    - { starter: 696146, name: "Hagen Smith" }
+    - { starter: 641743, name: "Anthony Kay", opener_max_bf: 6, bulk: 680732, bulk_name: "Sean Burke" }
+    - { starter: 663436, name: "Davis Martin" }
+    - { starter: 702273, name: "Noah Schultz" }
+    - { starter: 696146, name: "Hagen Smith" }
+    - { starter: 641743, name: "Anthony Kay", opener_max_bf: 6, bulk: 680732, bulk_name: "Sean Burke" }
+    - { starter: 663436, name: "Davis Martin" }
+
+# Batting orders by opposing starter hand. Lists of MLBAM IDs in order.
+lineups:
+  CWS:
+    vs_R: [803011, 805367, 808959, 678246, 695657, 643217, 671976, 695731, 691019]
+    vs_L: [803011, 805367, 808959, 678246, 695657, 545341, 671976, 695731, 691019]
+  TB:
+    vs_R: [802415, 650490, 691406, 666018, 676356, 689414, 680700, 656775, 670764]
+    vs_L: [802415, 650490, 691406, 666018, 676356, 668723, 663743, 656775, 670764]
+
+# Bullpens. `auto` = pitchers with 40+ September pitches who are not in the rotation.
+# Use include/exclude to match the announced postseason roster.
+bullpen:
+  CWS: { mode: auto, include: [], exclude: [] }
+  TB:  { mode: auto, include: [], exclude: [663556] }   # McClanahan (forearm) ruled out of the ALDS
+
+model:
+  league_scope: league          # "league" pulls every 2026 pitch (needed for the backtest); "teams" pulls only CWS/TB games
+  backtest_split: "2026-08-01"  # train before this date, test on/after
+  recent_half_life_days: 60     # recency weighting for rates; set to 0 to weight the season evenly
+  shrink:                       # pseudo-PA / pseudo-pitch counts for regression to the mean
+    pitch_type: 200
+    pitch_group: 400
+    pitcher_pitch: 300
+    pa: { K: 60, BB: 120, "1B": 300, "2B": 600, "3B": 600, HR: 170, OUT: 300 }
+  home_pa_tilt: 0.05            # home batters get exp(0.05) odds on good PA outcomes; with identical teams this gives the home side ~53.5% (MLB norm)
+  postseason_leverage_boost: 1.6  # how much more often top relievers get high-leverage innings in October
+
+sim:
+  n_series: 5000
+  bootstrap: 20                 # resample the data this many times to get an uncertainty range
+  seed: 2026

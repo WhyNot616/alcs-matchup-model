@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alcs-matchup-model"
+version = "0.1.0"
+description = "Pitch-level matchup model, bullpen tendencies and PA-by-PA series simulator for the 2026 White Sox vs Rays ALCS."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Ami Argentar" }]
+license = { text = "MIT" }
+dependencies = [
+  "pandas>=2.1",
+  "numpy>=1.26",
+  "pyarrow>=14",
+  "requests>=2.31",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+alcs = "alcs_model.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
