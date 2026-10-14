@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14 11:38",
+ "generated": "2026-10-14 19:27",
  "as_of": "2026-10-13",
  "n": 5000,
  "settings": {
@@ -1236,7 +1236,7 @@
      "away": "MIL",
      "score": null,
      "probables": {
-      "home": null,
+      "home": 607192,
       "away": null
      },
      "if_necessary": "N",
@@ -1895,11 +1895,11 @@
     4.1004
    ],
    "status": "Scheduled",
-   "market": 0.5423839616474178,
+   "market": 0.5451883661916846,
    "market_total": 6.5,
    "market_ml": [
-    "-131",
-    "+109"
+    "-133",
+    "+110"
    ]
   },
   {
@@ -1922,11 +1922,11 @@
     4.6128
    ],
    "status": "Scheduled",
-   "market": 0.6159575776626715,
+   "market": 0.6173677069199457,
    "market_total": 7.5,
    "market_ml": [
-    "-181",
-    "+149"
+    "-182",
+    "+150"
    ]
   }
  ],
