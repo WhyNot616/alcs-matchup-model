@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17 11:18",
+ "generated": "2026-10-18 11:18",
  "settings": {
   "post_sims": 4000,
   "reg_sims": 300,
@@ -90,15 +90,15 @@
   "stuff_gamma": 0.0
  },
  "postseason_calibration_no_env": {
-  "tilt": 0.04686800054460581,
-  "rpg_at_0": 4.032552083333333,
-  "target": 4.382636244339234,
+  "tilt": 0.04855989702774018,
+  "rpg_at_0": 4.02020202020202,
+  "target": 4.380175281011016,
   "factor": 1.0
  },
  "postseason_calibration": {
-  "tilt": -0.010334602845404238,
-  "rpg_at_0": 4.032552083333333,
-  "target": 3.9592009921539995,
+  "tilt": -0.008976012888457811,
+  "rpg_at_0": 4.02020202020202,
+  "target": 3.9569777986449965,
   "factor": 0.903383436685589
  },
  "postseason": {
@@ -113,9 +113,9 @@
      "SD": 650633,
      "CHC": 571510
     },
-    "p_home": 0.5885,
-    "exp_home": 4.67,
-    "exp_away": 4.12,
+    "p_home": 0.599,
+    "exp_home": 4.73,
+    "exp_away": 4.11,
     "home_runs": 8,
     "away_runs": 0,
     "baselines": {
@@ -133,9 +133,9 @@
      "+108"
     ],
     "no_env": {
-     "p_home": 0.5945,
-     "exp_home": 5.14,
-     "exp_away": 4.54
+     "p_home": 0.5985,
+     "exp_home": 5.22,
+     "exp_away": 4.48
     },
     "starter_names": {
      "SD": "King, Michael",
@@ -153,8 +153,8 @@
      "PHI": 666200
     },
     "p_home": 0.5423,
-    "exp_home": 3.26,
-    "exp_away": 3.11,
+    "exp_home": 3.3,
+    "exp_away": 3.09,
     "home_runs": 5,
     "away_runs": 3,
     "baselines": {
@@ -172,9 +172,9 @@
      "+158"
     ],
     "no_env": {
-     "p_home": 0.5517,
-     "exp_home": 3.64,
-     "exp_away": 3.39
+     "p_home": 0.5403,
+     "exp_home": 3.54,
+     "exp_away": 3.32
     },
     "starter_names": {
      "ATL": "Sale, Chris",
@@ -191,9 +191,9 @@
      "HOU": 805123,
      "CWS": 696146
     },
-    "p_home": 0.505,
-    "exp_home": 4.18,
-    "exp_away": 4.35,
+    "p_home": 0.5012,
+    "exp_home": 4.21,
+    "exp_away": 4.37,
     "home_runs": 3,
     "away_runs": 6,
     "baselines": {
@@ -211,9 +211,9 @@
      "+102"
     ],
     "no_env": {
-     "p_home": 0.5012,
-     "exp_home": 4.55,
-     "exp_away": 4.8
+     "p_home": 0.514,
+     "exp_home": 4.64,
+     "exp_away": 4.78
     },
     "starter_names": {
      "HOU": "Blubaugh, AJ",
@@ -230,9 +230,9 @@
      "NYY": 693645,
      "BOS": 801139
     },
-    "p_home": 0.554,
-    "exp_home": 3.43,
-    "exp_away": 3.08,
+    "p_home": 0.557,
+    "exp_home": 3.41,
+    "exp_away": 3.09,
     "home_runs": 9,
     "away_runs": 0,
     "baselines": {
@@ -250,9 +250,9 @@
      "+109"
     ],
     "no_env": {
-     "p_home": 0.552,
+     "p_home": 0.5535,
      "exp_home": 3.72,
-     "exp_away": 3.4
+     "exp_away": 3.37
     },
     "starter_names": {
      "NYY": "Schlittler, Cam",
@@ -269,8 +269,8 @@
      "ATL": 641816,
      "PHI": 650911
     },
-    "p_home": 0.5377,
-    "exp_home": 3.72,
+    "p_home": 0.5385,
+    "exp_home": 3.74,
     "exp_away": 3.55,
     "home_runs": 3,
     "away_runs": 4,
@@ -289,9 +289,9 @@
      "-117"
     ],
     "no_env": {
-     "p_home": 0.5435,
-     "exp_home": 4.19,
-     "exp_away": 3.97
+     "p_home": 0.544,
+     "exp_home": 4.2,
+     "exp_away": 3.94
     },
     "starter_names": {
      "ATL": "Mahle, Tyler",
@@ -308,9 +308,9 @@
      "SD": 601713,
      "CHC": 592332
     },
-    "p_home": 0.613,
-    "exp_home": 4.6,
-    "exp_away": 3.83,
+    "p_home": 0.5935,
+    "exp_home": 4.53,
+    "exp_away": 3.9,
     "home_runs": 4,
     "away_runs": 1,
     "baselines": {
@@ -328,9 +328,9 @@
      "+123"
     ],
     "no_env": {
-     "p_home": 0.6075,
-     "exp_home": 4.98,
-     "exp_away": 4.19
+     "p_home": 0.588,
+     "exp_home": 4.9,
+     "exp_away": 4.3
     },
     "starter_names": {
      "SD": "Pivetta, Nick",
@@ -347,8 +347,8 @@
      "HOU": 686613,
      "CWS": 680732
     },
-    "p_home": 0.5485,
-    "exp_home": 4.29,
+    "p_home": 0.5533,
+    "exp_home": 4.27,
     "exp_away": 4.11,
     "home_runs": 3,
     "away_runs": 7,
@@ -367,9 +367,9 @@
      "+128"
     ],
     "no_env": {
-     "p_home": 0.5603,
-     "exp_home": 4.73,
-     "exp_away": 4.43
+     "p_home": 0.565,
+     "exp_home": 4.77,
+     "exp_away": 4.47
     },
     "starter_names": {
      "HOU": "Brown, Hunter",
@@ -386,9 +386,9 @@
      "NYY": 608331,
      "BOS": 543243
     },
-    "p_home": 0.537,
-    "exp_home": 3.68,
-    "exp_away": 3.42,
+    "p_home": 0.5407,
+    "exp_home": 3.73,
+    "exp_away": 3.48,
     "home_runs": 9,
     "away_runs": 2,
     "baselines": {
@@ -406,9 +406,9 @@
      "+113"
     ],
     "no_env": {
-     "p_home": 0.532,
-     "exp_home": 4.03,
-     "exp_away": 3.85
+     "p_home": 0.5302,
+     "exp_home": 4.0,
+     "exp_away": 3.81
     },
     "starter_names": {
      "NYY": "Fried, Max",
@@ -425,9 +425,9 @@
      "ATL": 678061,
      "PHI": 605400
     },
-    "p_home": 0.592,
-    "exp_home": 4.8,
-    "exp_away": 4.02,
+    "p_home": 0.5837,
+    "exp_home": 4.79,
+    "exp_away": 4.1,
     "home_runs": 6,
     "away_runs": 2,
     "baselines": {
@@ -445,9 +445,9 @@
      "-106"
     ],
     "no_env": {
-     "p_home": 0.5863,
+     "p_home": 0.5747,
      "exp_home": 5.17,
-     "exp_away": 4.41
+     "exp_away": 4.53
     },
     "starter_names": {
      "ATL": "Kerr, Ray",
@@ -464,9 +464,9 @@
      "LAD": 669373,
      "ATL": 689266
     },
-    "p_home": 0.6645,
-    "exp_home": 4.4,
-    "exp_away": 3.15,
+    "p_home": 0.6805,
+    "exp_home": 4.45,
+    "exp_away": 3.09,
     "home_runs": 5,
     "away_runs": 3,
     "baselines": {
@@ -484,9 +484,9 @@
      "+173"
     ],
     "no_env": {
-     "p_home": 0.6755,
-     "exp_home": 5.0,
-     "exp_away": 3.43
+     "p_home": 0.6795,
+     "exp_home": 4.97,
+     "exp_away": 3.39
     },
     "starter_names": {
      "LAD": "Skubal, Tarik",
@@ -503,9 +503,9 @@
      "CLE": 800048,
      "CWS": 696146
     },
-    "p_home": 0.6205,
-    "exp_home": 4.02,
-    "exp_away": 3.17,
+    "p_home": 0.6192,
+    "exp_home": 4.01,
+    "exp_away": 3.13,
     "home_runs": 0,
     "away_runs": 3,
     "baselines": {
@@ -523,9 +523,9 @@
      "+124"
     ],
     "no_env": {
-     "p_home": 0.6292,
-     "exp_home": 4.42,
-     "exp_away": 3.41
+     "p_home": 0.6215,
+     "exp_home": 4.4,
+     "exp_away": 3.49
     },
     "starter_names": {
      "CLE": "Messick, Parker",
@@ -542,9 +542,9 @@
      "MIL": 694819,
      "SD": 592662
     },
-    "p_home": 0.6663,
-    "exp_home": 4.02,
-    "exp_away": 2.71,
+    "p_home": 0.656,
+    "exp_home": 4.06,
+    "exp_away": 2.74,
     "home_runs": 3,
     "away_runs": 2,
     "baselines": {
@@ -562,9 +562,9 @@
      "+177"
     ],
     "no_env": {
-     "p_home": 0.6627,
-     "exp_home": 4.44,
-     "exp_away": 2.98
+     "p_home": 0.6657,
+     "exp_home": 4.49,
+     "exp_away": 3.01
     },
     "starter_names": {
      "MIL": "Misiorowski, Jacob",
@@ -581,9 +581,9 @@
      "TB": 656876,
      "NYY": 543037
     },
-    "p_home": 0.7105,
-    "exp_home": 4.26,
-    "exp_away": 2.6,
+    "p_home": 0.7045,
+    "exp_home": 4.22,
+    "exp_away": 2.59,
     "home_runs": 1,
     "away_runs": 0,
     "baselines": {
@@ -601,9 +601,9 @@
      "+119"
     ],
     "no_env": {
-     "p_home": 0.7145,
-     "exp_home": 4.71,
-     "exp_away": 2.81
+     "p_home": 0.7188,
+     "exp_home": 4.7,
+     "exp_away": 2.79
     },
     "starter_names": {
      "TB": "Rasmussen, Drew",
@@ -620,9 +620,9 @@
      "LAD": 605483,
      "ATL": 678061
     },
-    "p_home": 0.6478,
-    "exp_home": 4.39,
-    "exp_away": 3.23,
+    "p_home": 0.6775,
+    "exp_home": 4.49,
+    "exp_away": 3.12,
     "home_runs": 2,
     "away_runs": 3,
     "baselines": {
@@ -640,9 +640,9 @@
      "+174"
     ],
     "no_env": {
-     "p_home": 0.6607,
-     "exp_home": 4.8,
-     "exp_away": 3.45
+     "p_home": 0.667,
+     "exp_home": 4.83,
+     "exp_away": 3.46
     },
     "starter_names": {
      "LAD": "Snell, Blake",
@@ -659,9 +659,9 @@
      "MIL": 701656,
      "SD": 650633
     },
-    "p_home": 0.574,
-    "exp_home": 3.83,
-    "exp_away": 3.35,
+    "p_home": 0.5717,
+    "exp_home": 3.81,
+    "exp_away": 3.33,
     "home_runs": 4,
     "away_runs": 3,
     "baselines": {
@@ -679,8 +679,8 @@
      "+113"
     ],
     "no_env": {
-     "p_home": 0.5863,
-     "exp_home": 4.21,
+     "p_home": 0.586,
+     "exp_home": 4.2,
      "exp_away": 3.61
     },
     "starter_names": {
@@ -698,9 +698,9 @@
      "CLE": 668909,
      "CWS": 641743
     },
-    "p_home": 0.6082,
+    "p_home": 0.6218,
     "exp_home": 4.38,
-    "exp_away": 3.52,
+    "exp_away": 3.48,
     "home_runs": 3,
     "away_runs": 4,
     "baselines": {
@@ -718,9 +718,9 @@
      "+130"
     ],
     "no_env": {
-     "p_home": 0.625,
-     "exp_home": 4.77,
-     "exp_away": 3.79
+     "p_home": 0.6252,
+     "exp_home": 4.79,
+     "exp_away": 3.81
     },
     "starter_names": {
      "CLE": "Williams, Gavin",
@@ -737,9 +737,9 @@
      "TB": 642547,
      "NYY": 693645
     },
-    "p_home": 0.4818,
-    "exp_home": 3.31,
-    "exp_away": 3.6,
+    "p_home": 0.4973,
+    "exp_home": 3.42,
+    "exp_away": 3.61,
     "home_runs": 5,
     "away_runs": 2,
     "baselines": {
@@ -757,9 +757,9 @@
      "-126"
     ],
     "no_env": {
-     "p_home": 0.5098,
-     "exp_home": 3.72,
-     "exp_away": 3.89
+     "p_home": 0.5138,
+     "exp_home": 3.76,
+     "exp_away": 3.92
     },
     "starter_names": {
      "TB": "Peralta, Freddy",
@@ -776,9 +776,9 @@
      "ATL": 519242,
      "LAD": 808967
     },
-    "p_home": 0.4925,
-    "exp_home": 3.05,
-    "exp_away": 3.35,
+    "p_home": 0.5,
+    "exp_home": 3.13,
+    "exp_away": 3.33,
     "home_runs": 1,
     "away_runs": 3,
     "baselines": {
@@ -796,9 +796,9 @@
      "-115"
     ],
     "no_env": {
-     "p_home": 0.4905,
-     "exp_home": 3.4,
-     "exp_away": 3.77
+     "p_home": 0.4968,
+     "exp_home": 3.47,
+     "exp_away": 3.81
     },
     "starter_names": {
      "ATL": "Sale, Chris",
@@ -815,9 +815,9 @@
      "SD": 601713,
      "MIL": 669160
     },
-    "p_home": 0.6015,
-    "exp_home": 4.17,
-    "exp_away": 3.41,
+    "p_home": 0.6112,
+    "exp_home": 4.22,
+    "exp_away": 3.42,
     "home_runs": 4,
     "away_runs": 3,
     "baselines": {
@@ -835,9 +835,9 @@
      "+119"
     ],
     "no_env": {
-     "p_home": 0.6065,
-     "exp_home": 4.61,
-     "exp_away": 3.82
+     "p_home": 0.598,
+     "exp_home": 4.56,
+     "exp_away": 3.88
     },
     "starter_names": {
      "SD": "Pivetta, Nick",
@@ -854,9 +854,9 @@
      "ATL": 641816,
      "LAD": 607192
     },
-    "p_home": 0.4395,
-    "exp_home": 3.24,
-    "exp_away": 4.04,
+    "p_home": 0.4248,
+    "exp_home": 3.23,
+    "exp_away": 4.16,
     "home_runs": 1,
     "away_runs": 4,
     "baselines": {
@@ -874,9 +874,9 @@
      "-148"
     ],
     "no_env": {
-     "p_home": 0.4328,
-     "exp_home": 3.56,
-     "exp_away": 4.45
+     "p_home": 0.421,
+     "exp_home": 3.54,
+     "exp_away": 4.56
     },
     "starter_names": {
      "ATL": "Mahle, Tyler",
@@ -893,9 +893,9 @@
      "SD": 621111,
      "MIL": 688107
     },
-    "p_home": 0.5415,
-    "exp_home": 4.27,
-    "exp_away": 4.14,
+    "p_home": 0.5255,
+    "exp_home": 4.24,
+    "exp_away": 4.22,
     "home_runs": 1,
     "away_runs": 3,
     "baselines": {
@@ -913,9 +913,9 @@
      "-110"
     ],
     "no_env": {
-     "p_home": 0.5325,
-     "exp_home": 4.62,
-     "exp_away": 4.53
+     "p_home": 0.536,
+     "exp_home": 4.69,
+     "exp_away": 4.55
     },
     "starter_names": {
      "SD": "Buehler, Walker",
@@ -932,9 +932,9 @@
      "CWS": 656794,
      "CLE": 682982
     },
-    "p_home": 0.5275,
-    "exp_home": 4.24,
-    "exp_away": 4.14,
+    "p_home": 0.4983,
+    "exp_home": 4.1,
+    "exp_away": 4.25,
     "home_runs": 3,
     "away_runs": 9,
     "baselines": {
@@ -952,8 +952,8 @@
      "+110"
     ],
     "no_env": {
-     "p_home": 0.5178,
-     "exp_home": 4.55,
+     "p_home": 0.527,
+     "exp_home": 4.63,
      "exp_away": 4.54
     },
     "starter_names": {
@@ -971,9 +971,9 @@
      "NYY": 608331,
      "TB": 607259
     },
-    "p_home": 0.545,
-    "exp_home": 4.06,
-    "exp_away": 3.83,
+    "p_home": 0.5415,
+    "exp_home": 4.07,
+    "exp_away": 3.9,
     "home_runs": 3,
     "away_runs": 4,
     "baselines": {
@@ -991,9 +991,9 @@
      "+144"
     ],
     "no_env": {
-     "p_home": 0.5513,
-     "exp_home": 4.42,
-     "exp_away": 4.22
+     "p_home": 0.5437,
+     "exp_home": 4.36,
+     "exp_away": 4.23
     },
     "starter_names": {
      "NYY": "Fried, Max",
@@ -1010,9 +1010,9 @@
      "CWS": 696146,
      "CLE": 800048
     },
-    "p_home": 0.444,
-    "exp_home": 3.48,
-    "exp_away": 4.15,
+    "p_home": 0.4632,
+    "exp_home": 3.57,
+    "exp_away": 4.1,
     "home_runs": 5,
     "away_runs": 9,
     "baselines": {
@@ -1030,9 +1030,9 @@
      "-118"
     ],
     "no_env": {
-     "p_home": 0.444,
-     "exp_home": 3.86,
-     "exp_away": 4.54
+     "p_home": 0.4522,
+     "exp_home": 3.92,
+     "exp_away": 4.5
     },
     "starter_names": {
      "CWS": "Smith, Hagen",
@@ -1049,9 +1049,9 @@
      "CLE": 668909,
      "CWS": 680732
     },
-    "p_home": 0.5835,
-    "exp_home": 3.94,
-    "exp_away": 3.37,
+    "p_home": 0.5885,
+    "exp_home": 3.97,
+    "exp_away": 3.35,
     "home_runs": 2,
     "away_runs": 0,
     "baselines": {
@@ -1069,9 +1069,9 @@
      "+124"
     ],
     "no_env": {
-     "p_home": 0.5998,
-     "exp_home": 4.34,
-     "exp_away": 3.62
+     "p_home": 0.588,
+     "exp_home": 4.24,
+     "exp_away": 3.66
     },
     "starter_names": {
      "CLE": "Williams, Gavin",
@@ -1088,9 +1088,9 @@
      "MIL": 694819,
      "LAD": 669373
     },
-    "p_home": 0.5687,
-    "exp_home": 3.08,
-    "exp_away": 2.75,
+    "p_home": 0.5807,
+    "exp_home": 3.14,
+    "exp_away": 2.69,
     "home_runs": 2,
     "away_runs": 1,
     "baselines": {
@@ -1108,9 +1108,9 @@
      "-101"
     ],
     "no_env": {
-     "p_home": 0.5837,
+     "p_home": 0.5703,
      "exp_home": 3.47,
-     "exp_away": 2.97
+     "exp_away": 3.05
     },
     "starter_names": {
      "MIL": "Misiorowski, Jacob",
@@ -1127,8 +1127,8 @@
      "MIL": 701656,
      "LAD": 808967
     },
-    "p_home": 0.467,
-    "exp_home": 2.97,
+    "p_home": 0.471,
+    "exp_home": 2.99,
     "exp_away": 3.44,
     "home_runs": 7,
     "away_runs": 4,
@@ -1147,9 +1147,9 @@
      "-130"
     ],
     "no_env": {
-     "p_home": 0.4572,
-     "exp_home": 3.24,
-     "exp_away": 3.79
+     "p_home": 0.4665,
+     "exp_home": 3.22,
+     "exp_away": 3.77
     },
     "starter_names": {
      "MIL": "Henderson, Logan",
@@ -1166,9 +1166,9 @@
      "TB": 656876,
      "CLE": 656492
     },
-    "p_home": 0.6713,
-    "exp_home": 4.28,
-    "exp_away": 2.9,
+    "p_home": 0.6683,
+    "exp_home": 4.27,
+    "exp_away": 2.89,
     "home_runs": 3,
     "away_runs": 7,
     "baselines": {
@@ -1186,9 +1186,9 @@
      "+145"
     ],
     "no_env": {
-     "p_home": 0.6743,
-     "exp_home": 4.72,
-     "exp_away": 3.22
+     "p_home": 0.6825,
+     "exp_home": 4.75,
+     "exp_away": 3.15
     },
     "starter_names": {
      "TB": "Rasmussen, Drew",
@@ -1205,9 +1205,9 @@
      "TB": 642547,
      "CLE": 800048
     },
-    "p_home": 0.5032,
-    "exp_home": 3.72,
-    "exp_away": 3.96,
+    "p_home": 0.5042,
+    "exp_home": 3.73,
+    "exp_away": 3.95,
     "home_runs": 3,
     "away_runs": 1,
     "baselines": {
@@ -1225,9 +1225,9 @@
      "+117"
     ],
     "no_env": {
-     "p_home": 0.4835,
-     "exp_home": 3.98,
-     "exp_away": 4.37
+     "p_home": 0.4968,
+     "exp_home": 4.11,
+     "exp_away": 4.28
     },
     "starter_names": {
      "TB": "Peralta, Freddy",
@@ -1245,8 +1245,8 @@
      "MIL": 688107
     },
     "p_home": 0.625,
-    "exp_home": 4.59,
-    "exp_away": 3.5,
+    "exp_home": 4.64,
+    "exp_away": 3.6,
     "home_runs": 2,
     "away_runs": 6,
     "baselines": {
@@ -1264,9 +1264,9 @@
      "+156"
     ],
     "no_env": {
-     "p_home": 0.6342,
-     "exp_home": 5.04,
-     "exp_away": 3.81
+     "p_home": 0.635,
+     "exp_home": 5.09,
+     "exp_away": 3.89
     },
     "starter_names": {
      "LAD": "Snell, Blake",
@@ -1283,9 +1283,9 @@
      "LAD": 607192,
      "MIL": 675660
     },
-    "p_home": 0.66,
-    "exp_home": 4.68,
-    "exp_away": 3.33,
+    "p_home": 0.656,
+    "exp_home": 4.63,
+    "exp_away": 3.28,
     "home_runs": 4,
     "away_runs": 6,
     "baselines": {
@@ -1303,9 +1303,9 @@
      "+135"
     ],
     "no_env": {
-     "p_home": 0.6705,
-     "exp_home": 5.09,
-     "exp_away": 3.61
+     "p_home": 0.6567,
+     "exp_home": 5.01,
+     "exp_away": 3.67
     },
     "starter_names": {
      "LAD": "Glasnow, Tyler",
@@ -1322,9 +1322,9 @@
      "CLE": 668909,
      "TB": 643377
     },
-    "p_home": 0.5012,
-    "exp_home": 3.84,
-    "exp_away": 4.1,
+    "p_home": 0.5135,
+    "exp_home": 3.94,
+    "exp_away": 4.05,
     "home_runs": 3,
     "away_runs": 2,
     "baselines": {
@@ -1342,250 +1342,289 @@
      "+117"
     ],
     "no_env": {
-     "p_home": 0.5138,
-     "exp_home": 4.28,
-     "exp_away": 4.49
+     "p_home": 0.528,
+     "exp_home": 4.31,
+     "exp_away": 4.39
     },
     "starter_names": {
      "CLE": "Williams, Gavin",
      "TB": "Jax, Griffin"
     }
+   },
+   {
+    "game_pk": 849816,
+    "date": "2026-10-17",
+    "label": "AL Championship Series G4",
+    "home": "CLE",
+    "away": "TB",
+    "starters": {
+     "CLE": 542888,
+     "TB": 607259
+    },
+    "p_home": 0.475,
+    "exp_home": 3.84,
+    "exp_away": 4.31,
+    "home_runs": 3,
+    "away_runs": 7,
+    "baselines": {
+     "coin": 0.5,
+     "home": 0.5286,
+     "log5_wpct": 0.447,
+     "log5_pythag": 0.4812,
+     "market": 0.4954,
+     "market_open": 0.4902
+    },
+    "venue": "Progressive Field",
+    "market_total": 6.5,
+    "market_ml": [
+     "-104",
+     "-108"
+    ],
+    "no_env": {
+     "p_home": 0.4753,
+     "exp_home": 4.2,
+     "exp_away": 4.69
+    },
+    "starter_names": {
+     "CLE": "Armstrong, Shawn",
+     "TB": "Martinez, Nick"
+    }
    }
   ],
   "metrics": {
    "model": {
-    "n": 32,
-    "brier": 0.24880732421874996,
-    "logloss": 0.691033005283372,
-    "accuracy": 0.5625
+    "n": 33,
+    "brier": 0.24698687121212126,
+    "logloss": 0.6876376776027536,
+    "accuracy": 0.5909090909090909
    },
    "coin": {
-    "n": 32,
+    "n": 33,
     "brier": 0.25,
     "logloss": 0.6931471805599453,
     "accuracy": 0.5
    },
    "home": {
-    "n": 32,
-    "brier": 0.24903039339048658,
-    "logloss": 0.6912067423748753,
-    "accuracy": 0.53125
+    "n": 33,
+    "brier": 0.24995163233405981,
+    "logloss": 0.6930512354245407,
+    "accuracy": 0.5151515151515151
    },
    "log5_wpct": {
-    "n": 32,
-    "brier": 0.23593716983391708,
-    "logloss": 0.6647960271136873,
-    "accuracy": 0.5625
+    "n": 33,
+    "brier": 0.23484329036696527,
+    "logloss": 0.6626039734750766,
+    "accuracy": 0.5757575757575758
    },
    "log5_pythag": {
-    "n": 32,
-    "brier": 0.24353792230752272,
-    "logloss": 0.6798811995561092,
-    "accuracy": 0.5
+    "n": 33,
+    "brier": 0.24317532682964785,
+    "logloss": 0.6791658463235462,
+    "accuracy": 0.5151515151515151
    },
    "market": {
-    "n": 32,
-    "brier": 0.25090722545800803,
-    "logloss": 0.6951687423142461,
-    "accuracy": 0.609375
+    "n": 33,
+    "brier": 0.2507415685643741,
+    "logloss": 0.6948311447283503,
+    "accuracy": 0.6212121212121212
    },
    "market_open": {
-    "n": 32,
-    "brier": 0.25334580751204344,
-    "logloss": 0.699798134224686,
-    "accuracy": 0.5625
+    "n": 33,
+    "brier": 0.2529498622762529,
+    "logloss": 0.6990074005771415,
+    "accuracy": 0.5757575757575758
    }
   },
   "vs_model": {
    "coin": {
-    "brier_diff": -0.0011926757812499994,
-    "lo": -0.03311714008789062,
-    "hi": 0.03217422685546875,
-    "n": 32,
-    "p_model_better": 0.525
+    "brier_diff": -0.0030131287878787877,
+    "lo": -0.03569949133522727,
+    "hi": 0.030817364725378785,
+    "n": 33,
+    "p_model_better": 0.586
    },
    "home": {
-    "brier_diff": -0.00022306917173659652,
-    "lo": -0.025888935370090148,
-    "hi": 0.025867478642134366,
-    "n": 32,
-    "p_model_better": 0.5205
+    "brier_diff": -0.0029647611219386174,
+    "lo": -0.030144863906922302,
+    "hi": 0.02397069673428417,
+    "n": 33,
+    "p_model_better": 0.5875
    },
    "log5_wpct": {
-    "brier_diff": 0.012870154384832938,
-    "lo": -0.012871288177176617,
-    "hi": 0.03709800676163254,
-    "n": 32,
-    "p_model_better": 0.173
+    "brier_diff": 0.01214358084515597,
+    "lo": -0.011881517842455292,
+    "hi": 0.03665312505349931,
+    "n": 33,
+    "p_model_better": 0.172
    },
    "log5_pythag": {
-    "brier_diff": 0.005269401911227255,
-    "lo": -0.026507610644954858,
-    "hi": 0.03632071368606692,
-    "n": 32,
-    "p_model_better": 0.373
+    "brier_diff": 0.003811544382473339,
+    "lo": -0.02784211131033115,
+    "hi": 0.032123692655330695,
+    "n": 33,
+    "p_model_better": 0.41
    },
    "market": {
-    "brier_diff": -0.0020999012392580244,
-    "lo": -0.018023761595847464,
-    "hi": 0.014074993638647029,
-    "n": 32,
-    "p_model_better": 0.5955
+    "brier_diff": -0.0037546973522528484,
+    "lo": -0.01974392863957451,
+    "hi": 0.011781787698259312,
+    "n": 33,
+    "p_model_better": 0.6795
    },
    "market_open": {
-    "brier_diff": -0.004538483293293486,
-    "lo": -0.022047310842230373,
-    "hi": 0.01265007518033297,
-    "n": 32,
-    "p_model_better": 0.6925
+    "brier_diff": -0.005962991064131736,
+    "lo": -0.022695721308236633,
+    "hi": 0.012158190034026786,
+    "n": 33,
+    "p_model_better": 0.749
    }
   },
   "runs": {
-   "exp_total_mean": 7.50721875,
-   "act_total_mean": 7.0,
-   "rmse_total": 2.954307411433346,
-   "rmse_total_const": 3.0322880569549393,
-   "corr_margin": 0.043336488882898094
+   "exp_total_mean": 7.548015151515152,
+   "act_total_mean": 7.090909090909091,
+   "rmse_total": 2.929310063303251,
+   "rmse_total_const": 3.0232557660950246,
+   "corr_margin": 0.11194277300183907
   },
   "no_env": {
    "metrics": {
     "model": {
-     "n": 32,
-     "brier": 0.24934866015624998,
-     "logloss": 0.6924118569078842,
-     "accuracy": 0.5625
+     "n": 33,
+     "brier": 0.2496406628787879,
+     "logloss": 0.6929959748143897,
+     "accuracy": 0.5757575757575758
     },
     "coin": {
-     "n": 32,
+     "n": 33,
      "brier": 0.25,
      "logloss": 0.6931471805599453,
      "accuracy": 0.5
     },
     "home": {
-     "n": 32,
-     "brier": 0.24903039339048658,
-     "logloss": 0.6912067423748753,
-     "accuracy": 0.53125
+     "n": 33,
+     "brier": 0.24995163233405981,
+     "logloss": 0.6930512354245407,
+     "accuracy": 0.5151515151515151
     },
     "log5_wpct": {
-     "n": 32,
-     "brier": 0.23593716983391708,
-     "logloss": 0.6647960271136873,
-     "accuracy": 0.5625
+     "n": 33,
+     "brier": 0.23484329036696527,
+     "logloss": 0.6626039734750766,
+     "accuracy": 0.5757575757575758
     },
     "log5_pythag": {
-     "n": 32,
-     "brier": 0.24353792230752272,
-     "logloss": 0.6798811995561092,
-     "accuracy": 0.5
+     "n": 33,
+     "brier": 0.24317532682964785,
+     "logloss": 0.6791658463235462,
+     "accuracy": 0.5151515151515151
     },
     "market": {
-     "n": 32,
-     "brier": 0.25090722545800803,
-     "logloss": 0.6951687423142461,
-     "accuracy": 0.609375
+     "n": 33,
+     "brier": 0.2507415685643741,
+     "logloss": 0.6948311447283503,
+     "accuracy": 0.6212121212121212
     },
     "market_open": {
-     "n": 32,
-     "brier": 0.25334580751204344,
-     "logloss": 0.699798134224686,
-     "accuracy": 0.5625
+     "n": 33,
+     "brier": 0.2529498622762529,
+     "logloss": 0.6990074005771415,
+     "accuracy": 0.5757575757575758
     }
    },
    "vs_model": {
     "coin": {
-     "brier_diff": -0.0006513398437500099,
-     "lo": -0.03446417846679689,
-     "hi": 0.034215575244140595,
-     "n": 32,
-     "p_model_better": 0.5075
+     "brier_diff": -0.00035933712121212366,
+     "lo": -0.03385316870265152,
+     "hi": 0.03442347779356057,
+     "n": 33,
+     "p_model_better": 0.5135
     },
     "home": {
-     "brier_diff": 0.000318266765763393,
-     "lo": -0.027256290630943716,
-     "hi": 0.028506602983708496,
-     "n": 32,
-     "p_model_better": 0.5045
+     "brier_diff": -0.00031096945527195834,
+     "lo": -0.02866264421490384,
+     "hi": 0.027131481087296048,
+     "n": 33,
+     "p_model_better": 0.5025
     },
     "log5_wpct": {
-     "brier_diff": 0.01341149032233293,
-     "lo": -0.013968421987486528,
-     "hi": 0.03917224414138419,
-     "n": 32,
-     "p_model_better": 0.178
+     "brier_diff": 0.014797372511822634,
+     "lo": -0.009377249529144944,
+     "hi": 0.03990706496536998,
+     "n": 33,
+     "p_model_better": 0.131
     },
     "log5_pythag": {
-     "brier_diff": 0.0058107378487272454,
-     "lo": -0.027213638640878852,
-     "hi": 0.039298091877823564,
-     "n": 32,
-     "p_model_better": 0.367
+     "brier_diff": 0.006465336049140001,
+     "lo": -0.025432756249800112,
+     "hi": 0.03549921157192842,
+     "n": 33,
+     "p_model_better": 0.348
     },
     "market": {
-     "brier_diff": -0.0015585653017580335,
-     "lo": -0.01869420192286442,
-     "hi": 0.016077432265538764,
-     "n": 32,
-     "p_model_better": 0.5785
+     "brier_diff": -0.001100905685586188,
+     "lo": -0.016557796456002055,
+     "hi": 0.015043287475558555,
+     "n": 33,
+     "p_model_better": 0.5665
     },
     "market_open": {
-     "brier_diff": -0.003997147355793497,
-     "lo": -0.023143133417985295,
-     "hi": 0.014546500036157739,
-     "n": 32,
-     "p_model_better": 0.6565
+     "brier_diff": -0.003309199397465076,
+     "lo": -0.020409794613373656,
+     "hi": 0.014772827862284788,
+     "n": 33,
+     "p_model_better": 0.6375
     }
    },
    "runs": {
-    "exp_total_mean": 8.234398437500001,
-    "act_total_mean": 7.0,
-    "rmse_total": 3.1535850033013024,
-    "rmse_total_const": 3.234383944818927,
-    "corr_margin": 0.0316671387306638
+    "exp_total_mean": 8.272424242424243,
+    "act_total_mean": 7.090909090909091,
+    "rmse_total": 3.131155803034846,
+    "rmse_total_const": 3.213581729137116,
+    "corr_margin": 0.07844451052654139
    },
    "totals_market": {
-    "n": 32,
-    "model_mean": 8.234398437500001,
-    "market_mean": 7.03125,
-    "actual_mean": 7.0,
-    "rmse_model": 3.1535850033013024,
-    "rmse_market": 2.918154382482188,
-    "corr_model_market": 0.6446505073679245
+    "n": 33,
+    "model_mean": 8.272424242424243,
+    "market_mean": 7.015151515151516,
+    "actual_mean": 7.090909090909091,
+    "rmse_model": 3.131155803034846,
+    "rmse_market": 2.937479851639476,
+    "corr_model_market": 0.605618248101567
    }
   },
   "post_factor": 0.903383436685589,
   "totals_market": {
-   "n": 32,
-   "model_mean": 7.50721875,
-   "market_mean": 7.03125,
-   "actual_mean": 7.0,
-   "rmse_model": 2.954307411433346,
-   "rmse_market": 2.918154382482188,
-   "corr_model_market": 0.6271835085385157
+   "n": 33,
+   "model_mean": 7.548015151515152,
+   "market_mean": 7.015151515151516,
+   "actual_mean": 7.090909090909091,
+   "rmse_model": 2.929310063303251,
+   "rmse_market": 2.937479851639476,
+   "corr_model_market": 0.586579315850048
   },
   "market_test": {
-   "n": 32,
+   "n": 33,
    "coef": {
-    "intercept": -0.020449473762566995,
-    "market": 0.3800700716740634,
-    "model_minus_market": 1.0435353673703827
+    "intercept": -0.16954848609584863,
+    "market": 0.6271472164564771,
+    "model_minus_market": 1.5884717253411504
    },
    "se": {
-    "intercept": 0.5074029260046775,
-    "market": 1.5449244044302102,
-    "model_minus_market": 1.8668054216097856
+    "intercept": 0.49180566630877726,
+    "market": 1.525220041137039,
+    "model_minus_market": 1.8907803832624157
    },
-   "brier_blend": 0.24921390508902624,
-   "brier_model": 0.24880732421874996,
-   "brier_market": 0.25090722545800803,
-   "corr_model_market": 0.7375391949693006,
-   "mean_abs_gap": 0.03839070234181947
+   "brier_blend": 0.2482447818682944,
+   "brier_model": 0.24698687121212126,
+   "brier_market": 0.2507415685643741,
+   "corr_model_market": 0.7568736493221723,
+   "mean_abs_gap": 0.03911740532621766
   },
   "pa": {
-   "n": 2312,
-   "logloss_league": 1.4265730947778443,
-   "logloss_model": 1.4011945020081202,
-   "skill_pct": 1.7789900049724563
+   "n": 2387,
+   "logloss_league": 1.4267617936604744,
+   "logloss_model": 1.4022542336790602,
+   "skill_pct": 1.7177050920699264
   }
  },
  "regular_calibration": {
@@ -1600,9 +1639,9 @@
   "metrics": {
    "model": {
     "n": 777,
-    "brier": 0.2403141141141141,
-    "logloss": 0.6734364859904926,
-    "accuracy": 0.5926640926640927
+    "brier": 0.2402269698269698,
+    "logloss": 0.6732573865893058,
+    "accuracy": 0.5933075933075933
    },
    "coin": {
     "n": 777,
@@ -1643,54 +1682,54 @@
   },
   "vs_model": {
    "coin": {
-    "brier_diff": -0.009685885885885887,
-    "lo": -0.016405144787644786,
-    "hi": -0.003136306306306313,
+    "brier_diff": -0.009773030173030176,
+    "lo": -0.016510400757900758,
+    "hi": -0.0031753339053339114,
     "n": 777,
     "p_model_better": 0.9975
    },
    "home": {
-    "brier_diff": -0.008281682815494951,
-    "lo": -0.014942518628824711,
-    "hi": -0.0017717489279581596,
+    "brier_diff": -0.00836882710263924,
+    "lo": -0.015083538301212422,
+    "hi": -0.0018498221083679013,
     "n": 777,
-    "p_model_better": 0.991
+    "p_model_better": 0.9925
    },
    "log5_wpct": {
-    "brier_diff": 0.0010728836215258507,
-    "lo": -0.004775435290182193,
-    "hi": 0.007156895494760878,
+    "brier_diff": 0.000985739334381564,
+    "lo": -0.00488576791132633,
+    "hi": 0.007091655450276183,
     "n": 777,
-    "p_model_better": 0.35
+    "p_model_better": 0.363
    },
    "log5_pythag": {
-    "brier_diff": -0.0015441189903398946,
-    "lo": -0.007161385983251064,
-    "hi": 0.004452399727498046,
+    "brier_diff": -0.001631263277484182,
+    "lo": -0.007260184610116695,
+    "hi": 0.004327499640184151,
     "n": 777,
-    "p_model_better": 0.7075
+    "p_model_better": 0.7155
    },
    "market": {
-    "brier_diff": 0.003127268979727791,
-    "lo": -0.001542755848650948,
-    "hi": 0.008045955592327186,
+    "brier_diff": 0.003040124692583503,
+    "lo": -0.0017054398249108118,
+    "hi": 0.007959476946693113,
     "n": 777,
-    "p_model_better": 0.094
+    "p_model_better": 0.098
    },
    "market_open": {
-    "brier_diff": 0.003156960105458348,
-    "lo": -0.0014188613169059407,
-    "hi": 0.007867168739682538,
+    "brier_diff": 0.0030698158183140607,
+    "lo": -0.0014820314908095525,
+    "hi": 0.00772977926771711,
     "n": 777,
-    "p_model_better": 0.095
+    "p_model_better": 0.1015
    }
   },
   "runs": {
-   "exp_total_mean": 9.072711282711282,
+   "exp_total_mean": 9.072574002574003,
    "act_total_mean": 8.894465894465894,
-   "rmse_total": 4.337973193291012,
-   "rmse_total_const": 4.4115842293263885,
-   "corr_margin": 0.17584077615852323
+   "rmse_total": 4.338453387104417,
+   "rmse_total_const": 4.411578684800307,
+   "corr_margin": 0.1759567428190184
   },
   "calibration": [
    {
@@ -1709,12 +1748,12 @@
     "n": 74
    },
    {
-    "pred": 0.4773,
-    "actual": 0.4828,
-    "n": 145
+    "pred": 0.4774,
+    "actual": 0.4792,
+    "n": 144
    },
    {
-    "pred": 0.5272,
+    "pred": 0.527,
     "actual": 0.5915,
     "n": 164
    },
@@ -1724,18 +1763,18 @@
     "n": 143
    },
    {
-    "pred": 0.6252,
-    "actual": 0.6,
-    "n": 105
+    "pred": 0.6254,
+    "actual": 0.6075,
+    "n": 107
    },
    {
-    "pred": 0.6934,
-    "actual": 0.7083,
-    "n": 72
+    "pred": 0.694,
+    "actual": 0.7042,
+    "n": 71
    }
   ],
   "favorites": {
-   "mean_fav_prob": 0.5797340197340197,
+   "mean_fav_prob": 0.5798198198198198,
    "fav_win_rate": 0.5945945945945946
   },
   "team_bias": [
@@ -1762,12 +1801,12 @@
    {
     "team": "AZ",
     "g": 52,
-    "exp_model": 25.143,
+    "exp_model": 25.207,
     "exp_pythag": 26.35,
     "won": 28.0,
-    "resid_model": 2.857,
+    "resid_model": 2.793,
     "resid_pythag": 1.65,
-    "sd_model": 3.553
+    "sd_model": 3.552
    },
    {
     "team": "BAL",
@@ -1782,20 +1821,20 @@
    {
     "team": "BOS",
     "g": 53,
-    "exp_model": 27.287,
+    "exp_model": 27.297,
     "exp_pythag": 29.686,
     "won": 29.0,
-    "resid_model": 1.713,
+    "resid_model": 1.703,
     "resid_pythag": -0.686,
-    "sd_model": 3.579
+    "sd_model": 3.58
    },
    {
     "team": "CHC",
     "g": 52,
-    "exp_model": 26.32,
+    "exp_model": 26.337,
     "exp_pythag": 28.468,
     "won": 27.0,
-    "resid_model": 0.68,
+    "resid_model": 0.663,
     "resid_pythag": -1.468,
     "sd_model": 3.556
    },
@@ -1822,22 +1861,22 @@
    {
     "team": "COL",
     "g": 52,
-    "exp_model": 19.743,
+    "exp_model": 19.74,
     "exp_pythag": 20.685,
     "won": 15.0,
-    "resid_model": -4.743,
+    "resid_model": -4.74,
     "resid_pythag": -5.685,
     "sd_model": 3.463
    },
    {
     "team": "CWS",
     "g": 53,
-    "exp_model": 27.317,
+    "exp_model": 27.37,
     "exp_pythag": 29.12,
     "won": 26.0,
-    "resid_model": -1.317,
+    "resid_model": -1.37,
     "resid_pythag": -3.12,
-    "sd_model": 3.584
+    "sd_model": 3.582
    },
    {
     "team": "DET",
@@ -1882,10 +1921,10 @@
    {
     "team": "LAD",
     "g": 52,
-    "exp_model": 29.867,
+    "exp_model": 29.86,
     "exp_pythag": 33.217,
     "won": 31.0,
-    "resid_model": 1.133,
+    "resid_model": 1.14,
     "resid_pythag": -2.217,
     "sd_model": 3.518
    },
@@ -1912,62 +1951,62 @@
    {
     "team": "MIN",
     "g": 51,
-    "exp_model": 25.01,
+    "exp_model": 24.957,
     "exp_pythag": 24.102,
     "won": 21.0,
-    "resid_model": -4.01,
+    "resid_model": -3.957,
     "resid_pythag": -3.102,
-    "sd_model": 3.516
+    "sd_model": 3.515
    },
    {
     "team": "NYM",
     "g": 51,
-    "exp_model": 23.813,
+    "exp_model": 23.793,
     "exp_pythag": 22.104,
     "won": 27.0,
-    "resid_model": 3.187,
+    "resid_model": 3.207,
     "resid_pythag": 4.896,
     "sd_model": 3.518
    },
    {
     "team": "NYY",
     "g": 51,
-    "exp_model": 26.807,
+    "exp_model": 26.797,
     "exp_pythag": 30.587,
     "won": 31.0,
-    "resid_model": 4.193,
+    "resid_model": 4.203,
     "resid_pythag": 0.413,
     "sd_model": 3.514
    },
    {
     "team": "PHI",
     "g": 52,
-    "exp_model": 26.187,
+    "exp_model": 26.13,
     "exp_pythag": 24.74,
     "won": 31.0,
-    "resid_model": 4.813,
+    "resid_model": 4.87,
     "resid_pythag": 6.26,
-    "sd_model": 3.554
+    "sd_model": 3.553
    },
    {
     "team": "PIT",
     "g": 51,
-    "exp_model": 27.543,
+    "exp_model": 27.527,
     "exp_pythag": 25.721,
     "won": 27.0,
-    "resid_model": -0.543,
+    "resid_model": -0.527,
     "resid_pythag": 1.279,
     "sd_model": 3.516
    },
    {
     "team": "SD",
     "g": 52,
-    "exp_model": 27.713,
+    "exp_model": 27.707,
     "exp_pythag": 25.08,
     "won": 35.0,
-    "resid_model": 7.287,
+    "resid_model": 7.293,
     "resid_pythag": 9.92,
-    "sd_model": 3.554
+    "sd_model": 3.555
    },
    {
     "team": "SEA",
@@ -1982,20 +2021,20 @@
    {
     "team": "SF",
     "g": 52,
-    "exp_model": 25.297,
+    "exp_model": 25.323,
     "exp_pythag": 23.333,
     "won": 18.0,
-    "resid_model": -7.297,
+    "resid_model": -7.323,
     "resid_pythag": -5.333,
     "sd_model": 3.558
    },
    {
     "team": "STL",
     "g": 52,
-    "exp_model": 24.877,
+    "exp_model": 24.88,
     "exp_pythag": 24.779,
     "won": 23.0,
-    "resid_model": -1.877,
+    "resid_model": -1.88,
     "resid_pythag": -1.779,
     "sd_model": 3.544
    },
@@ -2043,35 +2082,35 @@
   "market_test": {
    "n": 777,
    "coef": {
-    "intercept": 0.01345353021219543,
-    "market": 1.292460639915132,
-    "model_minus_market": 0.28114131109475776
+    "intercept": 0.01300386245486202,
+    "market": 1.29556052217842,
+    "model_minus_market": 0.29265129098903603
    },
    "se": {
-    "intercept": 0.07813162394427642,
-    "market": 0.21854068945128804,
-    "model_minus_market": 0.2667161052397733
+    "intercept": 0.0781507320400442,
+    "market": 0.21866324061936937,
+    "model_minus_market": 0.26610754720715174
    },
-   "brier_blend": 0.23753719900657794,
-   "brier_model": 0.2403141141141141,
+   "brier_blend": 0.23748595901663686,
+   "brier_model": 0.2402269698269698,
    "brier_market": 0.23718684513438631,
-   "corr_model_market": 0.7177734943093422,
-   "mean_abs_gap": 0.05573428898339312
+   "corr_model_market": 0.7162664351551247,
+   "mean_abs_gap": 0.05591446916357329
   },
   "totals_market": {
    "n": 777,
-   "model_mean": 9.072711282711282,
+   "model_mean": 9.072574002574003,
    "market_mean": 8.217503217503218,
    "actual_mean": 8.894465894465894,
-   "rmse_model": 4.337973193291012,
+   "rmse_model": 4.338453387104417,
    "rmse_market": 4.358086907453945,
-   "corr_model_market": 0.7488815192280642
+   "corr_model_market": 0.7490421496796138
   },
   "pa": {
    "n": 58591,
    "logloss_league": 1.456924928228571,
-   "logloss_model": 1.4394760111015639,
-   "skill_pct": 1.1976538247734372
+   "logloss_model": 1.4394760143763519,
+   "skill_pct": 1.1976535999994675
   },
   "games": [
    [
@@ -3008,7 +3047,7 @@
     "2026-08-07",
     "LAD",
     "AZ",
-    0.4633,
+    0.47,
     0.3805,
     0.3681304233499869,
     3,
@@ -4278,7 +4317,7 @@
     "2026-08-17",
     "SD",
     "NYM",
-    0.5267,
+    0.5067,
     0.486,
     0.5319879776728209,
     1,
@@ -5718,7 +5757,7 @@
     "2026-08-28",
     "BOS",
     "NYY",
-    0.6533,
+    0.6433,
     0.5519,
     0.5934434692823954,
     0,
@@ -6538,7 +6577,7 @@
     "2026-09-02",
     "PHI",
     "AZ",
-    0.5233,
+    0.58,
     0.5405,
     0.4568008190911239,
     0,
@@ -6738,7 +6777,7 @@
     "2026-09-04",
     "STL",
     "COL",
-    0.4067,
+    0.4033,
     0.4483,
     0.45481163380831546,
     7,
@@ -6778,7 +6817,7 @@
     "2026-09-04",
     "MIN",
     "CWS",
-    0.5767,
+    0.63,
     0.588,
     0.5423839616474178,
     1,
@@ -7598,7 +7637,7 @@
     "2026-09-11",
     "SD",
     "SF",
-    0.46,
+    0.4867,
     0.4875,
     0.4081189286490177,
     7,
@@ -7808,7 +7847,7 @@
     "2026-09-12",
     "PIT",
     "CHC",
-    0.5,
+    0.5167,
     0.5691,
     0.5431991809088762,
     3,
