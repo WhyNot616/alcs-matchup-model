@@ -1,6 +1,6 @@
 {
- "generated": "2026-10-19 22:44",
- "as_of": "2026-10-18",
+ "generated": "2026-10-20 15:45",
+ "as_of": "2026-10-19",
  "n": 5000,
  "settings": {
   "post_factor": 0.903383436685589,
@@ -88,7 +88,7 @@
    ]
   },
   "boost": 1.6,
-  "scoring_tilt": -0.0337504344363528
+  "scoring_tilt": 0.0
  },
  "seeds": {
   "TB": 1,
@@ -105,47 +105,6 @@
   "PHI": 6
  },
  "teams": {
-  "CLE": {
-   "name": "Guardians",
-   "league": "AL",
-   "seed": 2,
-   "w": 85,
-   "l": 77,
-   "p_wc": null,
-   "p_ds": 1.0,
-   "p_pennant": 0.2248,
-   "p_title": 0.0854,
-   "rotation": [
-    800048,
-    542888,
-    668909,
-    656492
-   ],
-   "lineups": {
-    "vs_R": [
-     680757,
-     608070,
-     800050,
-     666176,
-     663993,
-     683953,
-     672275,
-     682657,
-     677587
-    ],
-    "vs_L": [
-     680757,
-     608070,
-     800050,
-     666176,
-     663993,
-     690984,
-     694197,
-     672275,
-     677587
-    ]
-   }
-  },
   "MIL": {
    "name": "Brewers",
    "league": "NL",
@@ -155,7 +114,7 @@
    "p_wc": null,
    "p_ds": 1.0,
    "p_pennant": 1.0,
-   "p_title": 0.6148,
+   "p_title": 0.5714,
    "rotation": [
     675660,
     688107,
@@ -195,23 +154,23 @@
    "l": 64,
    "p_wc": null,
    "p_ds": 1.0,
-   "p_pennant": 0.7752,
-   "p_title": 0.2998,
+   "p_pennant": 1.0,
+   "p_title": 0.4286,
    "rotation": [
+    642547,
     656876,
     607259,
-    643377,
-    642547
+    643377
    ],
    "lineups": {
     "vs_R": [
      650490,
      666018,
-     802415,
+     689414,
      691406,
-     656775,
+     802415,
      683748,
-     663743,
+     676356,
      680700,
      670764
     ],
@@ -851,21 +810,12 @@
    "feeder": null,
    "wins": {
     "CLE": 2,
-    "TB": 3
+    "TB": 4
    },
-   "winner": null,
-   "p_win": {
-    "TB": 0.7752,
-    "CLE": 0.2248
-   },
-   "lengths": {
-    "TB in 7": 0.2386,
-    "TB in 6": 0.5366,
-    "CLE in 7": 0.2248
-   },
-   "pairings": {
-    "TB-CLE": 1.0
-   },
+   "winner": "TB",
+   "p_win": {},
+   "lengths": {},
+   "pairings": {},
    "games": [
     {
      "game_number": 1,
@@ -966,74 +916,18 @@
     {
      "game_number": 6,
      "date": "2026-10-19",
-     "status": "Pre-Game",
+     "status": "Final",
      "home": "TB",
      "away": "CLE",
-     "score": null,
+     "score": [
+      3,
+      7
+     ],
      "probables": {
       "home": 642547,
       "away": 542888
      },
-     "if_necessary": "N",
-     "p_played": 1.0,
-     "p_home_win": 0.5366,
-     "exp_runs": [
-      3.6418,
-      3.78
-     ],
-     "starters": {
-      "TB": [
-       [
-        642547,
-        1.0
-       ]
-      ],
-      "CLE": [
-       [
-        542888,
-        1.0
-       ]
-      ]
-     },
-     "home_mix": {
-      "TB": 1.0
-     }
-    },
-    {
-     "game_number": 7,
-     "date": "2026-10-20",
-     "status": "Scheduled",
-     "home": "TB",
-     "away": "CLE",
-     "score": null,
-     "probables": {
-      "home": null,
-      "away": null
-     },
-     "if_necessary": "Y",
-     "p_played": 0.4634,
-     "p_home_win": 0.514889943892965,
-     "exp_runs": [
-      3.479499352611135,
-      3.483815278377212
-     ],
-     "starters": {
-      "TB": [
-       [
-        643377,
-        1.0
-       ]
-      ],
-      "CLE": [
-       [
-        656492,
-        1.0
-       ]
-      ]
-     },
-     "home_mix": {
-      "TB": 1.0
-     }
+     "if_necessary": "N"
     }
    ]
   },
@@ -1132,35 +1026,33 @@
    "league": null,
    "label": "World Series",
    "best_of": 7,
-   "teams": null,
+   "teams": [
+    "MIL",
+    "TB"
+   ],
    "known": [
-    "MIL"
+    "MIL",
+    "TB"
    ],
    "feeder": null,
    "wins": {},
    "winner": null,
    "p_win": {
-    "MIL": 0.6148,
-    "TB": 0.2998,
-    "CLE": 0.0854
+    "MIL": 0.5714,
+    "TB": 0.4286
    },
    "lengths": {
-    "MIL in 6": 0.187,
-    "MIL in 7": 0.1682,
-    "TB in 6": 0.0868,
-    "TB in 7": 0.1142,
-    "MIL in 4": 0.0866,
-    "CLE in 6": 0.0266,
-    "MIL in 5": 0.173,
-    "CLE in 7": 0.0282,
-    "TB in 4": 0.0332,
-    "TB in 5": 0.0656,
-    "CLE in 5": 0.02,
-    "CLE in 4": 0.0106
+    "MIL in 5": 0.16,
+    "TB in 5": 0.0954,
+    "MIL in 6": 0.1814,
+    "TB in 7": 0.1664,
+    "TB in 6": 0.126,
+    "TB in 4": 0.0408,
+    "MIL in 7": 0.1476,
+    "MIL in 4": 0.0824
    },
    "pairings": {
-    "MIL-TB": 0.7752,
-    "MIL-CLE": 0.2248
+    "MIL-TB": 1.0
    },
    "games": [
     {
@@ -1168,7 +1060,7 @@
      "date": "2026-10-23",
      "status": "Scheduled",
      "home": "MIL",
-     "away": "TB/CLE",
+     "away": "TB",
      "score": null,
      "probables": {
       "home": null,
@@ -1176,10 +1068,10 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.6464,
+     "p_home_win": 0.6274,
      "exp_runs": [
-      2.3992,
-      3.4212
+      2.7986,
+      3.7282
      ],
      "starters": {
       "MIL": [
@@ -1191,17 +1083,7 @@
       "TB": [
        [
         643377,
-        0.5366
-       ],
-       [
-        607259,
-        0.2386
-       ]
-      ],
-      "CLE": [
-       [
-        668909,
-        0.2248
+        1.0
        ]
       ]
      },
@@ -1214,7 +1096,7 @@
      "date": "2026-10-24",
      "status": "Scheduled",
      "home": "MIL",
-     "away": "TB/CLE",
+     "away": "TB",
      "score": null,
      "probables": {
       "home": null,
@@ -1222,10 +1104,10 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.5502,
+     "p_home_win": 0.5762,
      "exp_runs": [
-      3.0692,
-      3.3076
+      3.3538,
+      3.8036
      ],
      "starters": {
       "MIL": [
@@ -1237,17 +1119,7 @@
       "TB": [
        [
         607259,
-        0.5366
-       ],
-       [
-        656876,
-        0.2386
-       ]
-      ],
-      "CLE": [
-       [
-        800048,
-        0.2248
+        1.0
        ]
       ]
      },
@@ -1259,7 +1131,7 @@
      "game_number": 3,
      "date": "2026-10-26",
      "status": "Scheduled",
-     "home": "TB/CLE",
+     "home": "TB",
      "away": "MIL",
      "score": null,
      "probables": {
@@ -1268,20 +1140,16 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.5194,
+     "p_home_win": 0.5606,
      "exp_runs": [
-      3.2756,
-      3.1958
+      2.9766,
+      3.3228
      ],
      "starters": {
       "TB": [
        [
         656876,
-        0.5366
-       ],
-       [
-        642547,
-        0.2386
+        1.0
        ]
       ],
       "MIL": [
@@ -1289,24 +1157,17 @@
         688107,
         1.0
        ]
-      ],
-      "CLE": [
-       [
-        542888,
-        0.2248
-       ]
       ]
      },
      "home_mix": {
-      "TB": 0.7752,
-      "CLE": 0.2248
+      "TB": 1.0
      }
     },
     {
      "game_number": 4,
      "date": "2026-10-27",
      "status": "Scheduled",
-     "home": "TB/CLE",
+     "home": "TB",
      "away": "MIL",
      "score": null,
      "probables": {
@@ -1315,20 +1176,16 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.5052,
+     "p_home_win": 0.4986,
      "exp_runs": [
-      3.7226,
-      3.5316
+      3.8572,
+      3.5954
      ],
      "starters": {
       "TB": [
        [
         642547,
-        0.5366
-       ],
-       [
-        643377,
-        0.2386
+        1.0
        ]
       ],
       "MIL": [
@@ -1336,24 +1193,17 @@
         675660,
         1.0
        ]
-      ],
-      "CLE": [
-       [
-        656492,
-        0.2248
-       ]
       ]
      },
      "home_mix": {
-      "TB": 0.7752,
-      "CLE": 0.2248
+      "TB": 1.0
      }
     },
     {
      "game_number": 5,
      "date": "2026-10-28",
      "status": "Scheduled",
-     "home": "TB/CLE",
+     "home": "TB",
      "away": "MIL",
      "score": null,
      "probables": {
@@ -1361,21 +1211,17 @@
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.8696,
-     "p_home_win": 0.4073137074517019,
+     "p_played": 0.8768,
+     "p_home_win": 0.4329379562043796,
      "exp_runs": [
-      3.591996320147194,
-      2.590846366145354
+      3.7144160583941606,
+      2.9386405109489053
      ],
      "starters": {
       "TB": [
        [
         643377,
-        0.5381784728610856
-       ],
-       [
-        607259,
-        0.23781048758049678
+        1.0
        ]
       ],
       "MIL": [
@@ -1383,17 +1229,10 @@
         694819,
         1.0
        ]
-      ],
-      "CLE": [
-       [
-        668909,
-        0.22401103955841767
-       ]
       ]
      },
      "home_mix": {
-      "TB": 0.7759889604415824,
-      "CLE": 0.22401103955841767
+      "TB": 1.0
      }
     },
     {
@@ -1401,18 +1240,18 @@
      "date": "2026-10-30",
      "status": "Scheduled",
      "home": "MIL",
-     "away": "TB/CLE",
+     "away": "TB",
      "score": null,
      "probables": {
       "home": null,
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.611,
-     "p_home_win": 0.5617021276595745,
+     "p_played": 0.6214,
+     "p_home_win": 0.5519794013517862,
      "exp_runs": [
-      3.0062193126022914,
-      3.278887070376432
+      3.343739942066302,
+      3.7000321853878337
      ],
      "starters": {
       "MIL": [
@@ -1424,17 +1263,7 @@
       "TB": [
        [
         607259,
-        0.5345335515548282
-       ],
-       [
-        656876,
-        0.24386252045826515
-       ]
-      ],
-      "CLE": [
-       [
-        800048,
-        0.2216039279869067
+        1.0
        ]
       ]
      },
@@ -1447,18 +1276,18 @@
      "date": "2026-10-31",
      "status": "Scheduled",
      "home": "MIL",
-     "away": "TB/CLE",
+     "away": "TB",
      "score": null,
      "probables": {
       "home": null,
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.3106,
-     "p_home_win": 0.5415325177076626,
+     "p_played": 0.314,
+     "p_home_win": 0.47006369426751593,
      "exp_runs": [
-      3.10624597553123,
-      3.2665808113329042
+      3.3101910828025476,
+      2.864968152866242
      ],
      "starters": {
       "MIL": [
@@ -1470,17 +1299,7 @@
       "TB": [
        [
         656876,
-        0.5505473277527366
-       ],
-       [
-        642547,
-        0.24404378622021894
-       ]
-      ],
-      "CLE": [
-       [
-        542888,
-        0.20540888602704443
+        1.0
        ]
       ]
      },
@@ -1493,30 +1312,30 @@
  ],
  "next_games": [
   {
-   "series": "LCS|AL",
-   "game_number": 6,
-   "date": "2026-10-19",
-   "home": "TB",
-   "away": "CLE",
+   "series": "WS",
+   "game_number": 1,
+   "date": "2026-10-23",
+   "home": "MIL",
+   "away": "TB",
    "starters": {
-    "TB": 642547,
-    "CLE": 542888
+    "MIL": 694819,
+    "TB": 643377
    },
    "announced": {
-    "TB": true,
-    "CLE": true
+    "MIL": false,
+    "TB": false
    },
-   "p_home": 0.5366,
+   "p_home": 0.6274,
    "exp_runs": [
-    3.6418,
-    3.78
+    2.7986,
+    3.7282
    ],
-   "status": "Pre-Game",
-   "market": 0.5848084969423882,
-   "market_total": 7.0,
+   "status": "Scheduled",
+   "market": 0.5913146565171273,
+   "market_total": 6.0,
    "market_ml": [
-    "-158",
-    "+130"
+    "-162",
+    "+134"
    ]
   }
  ],
@@ -1524,6 +1343,7 @@
   "ATL",
   "BOS",
   "CHC",
+  "CLE",
   "CWS",
   "HOU",
   "LAD",
