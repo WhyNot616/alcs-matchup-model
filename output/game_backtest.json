@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21 15:51",
+ "generated": "2026-10-22 15:48",
  "settings": {
   "post_sims": 4000,
   "reg_sims": 300,
@@ -1807,7 +1807,7 @@
    "act_total_mean": 8.894465894465894,
    "rmse_total": 4.337892211363584,
    "rmse_total_const": 4.412301761329647,
-   "corr_margin": 0.17437124535369727
+   "corr_margin": 0.17437124535369747
   },
   "calibration": [
    {
@@ -2172,7 +2172,7 @@
    "brier_blend": 0.23718500654854394,
    "brier_model": 0.2395192764192764,
    "brier_market": 0.23718684513438631,
-   "corr_model_market": 0.725547915299098,
+   "corr_model_market": 0.7255479152990977,
    "mean_abs_gap": 0.054811576294046364
   },
   "totals_market": {
@@ -2182,7 +2182,7 @@
    "actual_mean": 8.894465894465894,
    "rmse_model": 4.337892211363584,
    "rmse_market": 4.358086907453945,
-   "corr_model_market": 0.7420283798586264
+   "corr_model_market": 0.7420283798586265
   },
   "pa": {
    "n": 58591,
