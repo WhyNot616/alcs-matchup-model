@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-24 14:24",
+ "generated": "2026-10-24 21:22",
  "as_of": "2026-10-23",
  "n": 5000,
  "settings": {
@@ -114,7 +114,7 @@
    "p_wc": null,
    "p_ds": 1.0,
    "p_pennant": 1.0,
-   "p_title": 0.7328,
+   "p_title": 0.7238,
    "rotation": [
     694819,
     675660,
@@ -155,7 +155,7 @@
    "p_wc": null,
    "p_ds": 1.0,
    "p_pennant": 1.0,
-   "p_title": 0.2672,
+   "p_title": 0.2762,
    "rotation": [
     607259,
     642547,
@@ -1040,17 +1040,17 @@
    },
    "winner": null,
    "p_win": {
-    "MIL": 0.7328,
-    "TB": 0.2672
+    "MIL": 0.7238,
+    "TB": 0.2762
    },
    "lengths": {
-    "MIL in 5": 0.2218,
-    "TB in 6": 0.1112,
-    "MIL in 4": 0.145,
-    "MIL in 7": 0.1738,
-    "TB in 7": 0.1168,
-    "MIL in 6": 0.1922,
-    "TB in 5": 0.0392
+    "MIL in 4": 0.1466,
+    "MIL in 5": 0.2174,
+    "MIL in 7": 0.1772,
+    "TB in 6": 0.1074,
+    "MIL in 6": 0.1826,
+    "TB in 7": 0.1226,
+    "TB in 5": 0.0462
    },
    "pairings": {
     "MIL-TB": 1.0
@@ -1075,7 +1075,7 @@
     {
      "game_number": 2,
      "date": "2026-10-24",
-     "status": "Scheduled",
+     "status": "Pre-Game",
      "home": "MIL",
      "away": "TB",
      "score": null,
@@ -1085,10 +1085,10 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.5094,
+     "p_home_win": 0.498,
      "exp_runs": [
-      2.6494,
-      2.5798
+      2.734,
+      2.5542
      ],
      "starters": {
       "MIL": [
@@ -1116,20 +1116,20 @@
      "away": "MIL",
      "score": null,
      "probables": {
-      "home": null,
-      "away": null
+      "home": 642547,
+      "away": 688107
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.4636,
+     "p_home_win": 0.4334,
      "exp_runs": [
-      3.4388,
-      2.9072
+      3.5744,
+      2.8664
      ],
      "starters": {
       "TB": [
        [
-        643377,
+        642547,
         1.0
        ]
       ],
@@ -1157,15 +1157,15 @@
      },
      "if_necessary": "N",
      "p_played": 1.0,
-     "p_home_win": 0.4752,
+     "p_home_win": 0.4906,
      "exp_runs": [
-      3.5442,
-      3.145
+      3.3708,
+      3.0906
      ],
      "starters": {
       "TB": [
        [
-        642547,
+        643377,
         1.0
        ]
       ],
@@ -1192,11 +1192,11 @@
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.855,
-     "p_home_win": 0.4135672514619883,
+     "p_played": 0.8534,
+     "p_home_win": 0.440356222170143,
      "exp_runs": [
-      3.4966081871345027,
-      2.572865497076023
+      3.3822357628310287,
+      2.641434262948207
      ],
      "starters": {
       "TB": [
@@ -1228,11 +1228,11 @@
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.594,
-     "p_home_win": 0.5006734006734007,
+     "p_played": 0.5898,
+     "p_home_win": 0.5005086469989827,
      "exp_runs": [
-      2.72962962962963,
-      2.5424242424242425
+      2.721261444557477,
+      2.531027466937945
      ],
      "starters": {
       "MIL": [
@@ -1264,11 +1264,11 @@
       "away": null
      },
      "if_necessary": "Y",
-     "p_played": 0.2906,
-     "p_home_win": 0.5980729525120441,
+     "p_played": 0.2998,
+     "p_home_win": 0.5910607071380921,
      "exp_runs": [
-      2.8582243633860975,
-      3.4948382656572607
+      2.8052034689793195,
+      3.447631754503002
      ],
      "starters": {
       "MIL": [
@@ -1279,7 +1279,7 @@
       ],
       "TB": [
        [
-        643377,
+        642547,
         1.0
        ]
       ]
@@ -1306,16 +1306,16 @@
     "MIL": true,
     "TB": true
    },
-   "p_home": 0.5094,
+   "p_home": 0.498,
    "exp_runs": [
-    2.6494,
-    2.5798
+    2.734,
+    2.5542
    ],
-   "status": "Scheduled",
-   "market": 0.5217391304347826,
+   "status": "Pre-Game",
+   "market": 0.5226781857451405,
    "market_total": 6.5,
    "market_ml": [
-    "-120",
+    "-121",
     "+100"
    ]
   }
