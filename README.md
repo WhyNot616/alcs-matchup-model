@@ -1,16 +1,19 @@
-# ALCS Matchup Model
+# MLB Postseason Model
 
-A pitch-level scouting model and postseason simulator. It pulls every Statcast pitch of the season from
-Baseball Savant, builds hitter and pitcher profiles by pitch type, rates every pitcher's stuff, measures
-how each manager uses his bullpen, and simulates games plate appearance by plate appearance.
+A pitch-level scouting model and simulator for the whole 2026 MLB postseason. It pulls every Statcast
+pitch of the season from Baseball Savant, builds hitter and pitcher profiles by pitch type, rates every
+pitcher's stuff, measures how each manager uses his bullpen, and simulates games plate appearance by
+plate appearance to get odds for every series and the World Series.
+
+Live dashboard: https://whynot616.github.io/mlb-postseason-model/
 
 Two pages, published with GitHub Pages:
 
 - `docs/index.html`, the **postseason hub**: every remaining series simulated from the live bracket,
   odds for every team to win each round and the World Series, the next game in every series with the
   model's line next to the betting market's, and the model's track record.
-- `docs/series.html`, the **series deep dive** for the two teams in `config/series.yaml` (set up for a
-  White Sox vs Rays ALCS): pitch mix, hitter vs starter, zones, platoon, bullpens, defense and park.
+- `docs/series.html`, the **series deep dive** for any two teams in `config/series.yaml` (the 2026
+  ALCS between the White Sox and Rays is the first one built): pitch mix, hitter vs starter, zones, platoon, bullpens, defense and park.
 
 ## What it does
 
@@ -32,8 +35,8 @@ Two pages, published with GitHub Pages:
 ## Setup (VS Code)
 
 ```bash
-git clone https://github.com/WhyNot616/alcs-matchup-model.git
-cd alcs-matchup-model
+git clone https://github.com/WhyNot616/mlb-postseason-model.git
+cd mlb-postseason-model
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
