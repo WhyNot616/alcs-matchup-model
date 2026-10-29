@@ -1,6 +1,6 @@
 {
- "generated": "2026-10-28 22:56",
- "as_of": "2026-10-27",
+ "generated": "2026-10-29 17:26",
+ "as_of": "2026-10-28",
  "n": 5000,
  "settings": {
   "post_factor": 0.903383436685589,
@@ -33,7 +33,7 @@
     {
      "shrink_mult": 1.0,
      "half_life": 60,
-     "logloss": 1.4435845136111964
+     "logloss": 1.4435845136111969
     },
     {
      "shrink_mult": 1.0,
@@ -88,7 +88,7 @@
    ]
   },
   "boost": 1.6,
-  "scoring_tilt": -0.13221242685599713
+  "scoring_tilt": 0.0
  },
  "seeds": {
   "TB": 1,
@@ -114,12 +114,12 @@
    "p_wc": null,
    "p_ds": 1.0,
    "p_pennant": 1.0,
-   "p_title": 0.9352,
+   "p_title": 1.0,
    "rotation": [
+    694819,
     669160,
     688107,
-    701656,
-    694819
+    701656
    ],
    "lineups": {
     "vs_R": [
@@ -130,8 +130,8 @@
      668930,
      686217,
      806198,
-     800325,
-     687401
+     669003,
+     666152
     ],
     "vs_L": [
      694192,
@@ -143,47 +143,6 @@
      806198,
      800325,
      687401
-    ]
-   }
-  },
-  "TB": {
-   "name": "Rays",
-   "league": "AL",
-   "seed": 1,
-   "w": 98,
-   "l": 64,
-   "p_wc": null,
-   "p_ds": 1.0,
-   "p_pennant": 1.0,
-   "p_title": 0.0648,
-   "rotation": [
-    643377,
-    642547,
-    656876,
-    607259
-   ],
-   "lineups": {
-    "vs_R": [
-     622761,
-     666018,
-     656775,
-     663743,
-     676356,
-     802415,
-     810938,
-     680700,
-     670764
-    ],
-    "vs_L": [
-     650490,
-     666018,
-     802415,
-     691406,
-     810938,
-     676356,
-     683748,
-     656775,
-     622761
     ]
    }
   }
@@ -1036,23 +995,13 @@
    ],
    "feeder": null,
    "wins": {
-    "MIL": 3,
+    "MIL": 4,
     "TB": 1
    },
-   "winner": null,
-   "p_win": {
-    "MIL": 0.9352,
-    "TB": 0.0648
-   },
-   "lengths": {
-    "MIL in 6": 0.2616,
-    "MIL in 5": 0.5784,
-    "TB in 7": 0.0648,
-    "MIL in 7": 0.0952
-   },
-   "pairings": {
-    "MIL-TB": 1.0
-   },
+   "winner": "MIL",
+   "p_win": {},
+   "lengths": {},
+   "pairings": {},
    "games": [
     {
      "game_number": 1,
@@ -1121,143 +1070,23 @@
     {
      "game_number": 5,
      "date": "2026-10-28",
-     "status": "Pre-Game",
+     "status": "Final",
      "home": "TB",
      "away": "MIL",
-     "score": null,
+     "score": [
+      4,
+      1
+     ],
      "probables": {
       "home": 656876,
       "away": 694819
      },
-     "if_necessary": "N",
-     "p_played": 1.0,
-     "p_home_win": 0.4216,
-     "exp_runs": [
-      2.5608,
-      1.845
-     ],
-     "starters": {
-      "TB": [
-       [
-        656876,
-        1.0
-       ]
-      ],
-      "MIL": [
-       [
-        694819,
-        1.0
-       ]
-      ]
-     },
-     "home_mix": {
-      "TB": 1.0
-     }
-    },
-    {
-     "game_number": 6,
-     "date": "2026-10-30",
-     "status": "Scheduled",
-     "home": "MIL",
-     "away": "TB",
-     "score": null,
-     "probables": {
-      "home": null,
-      "away": null
-     },
-     "if_necessary": "Y",
-     "p_played": 0.4216,
-     "p_home_win": 0.6204933586337761,
-     "exp_runs": [
-      2.054079696394687,
-      2.9018026565464896
-     ],
-     "starters": {
-      "MIL": [
-       [
-        701656,
-        1.0
-       ]
-      ],
-      "TB": [
-       [
-        607259,
-        1.0
-       ]
-      ]
-     },
-     "home_mix": {
-      "MIL": 1.0
-     }
-    },
-    {
-     "game_number": 7,
-     "date": "2026-10-31",
-     "status": "Scheduled",
-     "home": "MIL",
-     "away": "TB",
-     "score": null,
-     "probables": {
-      "home": null,
-      "away": null
-     },
-     "if_necessary": "Y",
-     "p_played": 0.16,
-     "p_home_win": 0.595,
-     "exp_runs": [
-      2.655,
-      3.22625
-     ],
-     "starters": {
-      "MIL": [
-       [
-        688107,
-        1.0
-       ]
-      ],
-      "TB": [
-       [
-        642547,
-        1.0
-       ]
-      ]
-     },
-     "home_mix": {
-      "MIL": 1.0
-     }
+     "if_necessary": "N"
     }
    ]
   }
  ],
- "next_games": [
-  {
-   "series": "WS",
-   "game_number": 5,
-   "date": "2026-10-28",
-   "home": "TB",
-   "away": "MIL",
-   "starters": {
-    "TB": 656876,
-    "MIL": 694819
-   },
-   "announced": {
-    "TB": true,
-    "MIL": true
-   },
-   "p_home": 0.4216,
-   "exp_runs": [
-    2.5608,
-    1.845
-   ],
-   "status": "Pre-Game",
-   "market": 0.43509272467902993,
-   "market_total": 6.0,
-   "market_ml": [
-    "+120",
-    "-144"
-   ]
-  }
- ],
+ "next_games": [],
  "eliminated": [
   "ATL",
   "BOS",
@@ -1268,7 +1097,8 @@
   "LAD",
   "NYY",
   "PHI",
-  "SD"
+  "SD",
+  "TB"
  ],
  "team_info": {
   "ATL": {
